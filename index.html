@@ -3708,6 +3708,7 @@ function showBundle(b){
     nodes.push(el("div",{class:"st-card"},kids));
   });
   b.warn.forEach(function(w){nodes.push(el("div",{class:"st-warn",text:"⚠ "+w}))});
+  if(b.note)nodes.push(el("div",{class:"st-card"},[el("b",{text:"Ghi chú tham khảo"}),el("div",{class:"st-muted",text:b.note})]));
   var btns=el("div",{class:"st-row",style:"margin-top:8px"},[el("button",{class:"st-btn g",text:"← Danh sách bệnh",onclick:bundleList})]);
   if(T.shareBundle)btns.appendChild(el("button",{class:"st-btn",text:"Sao chép gợi ý",onclick:function(){T.shareBundle(b)}}));
   nodes.push(btns);
@@ -3715,12 +3716,313 @@ function showBundle(b){
 }
 function bundleList(){
   var nodes=[el("p",{class:"st-muted",text:"Chọn tình huống khách mô tả. Sản phẩm bạn đã đánh dấu ★ trong \"Hàng của tôi\" sẽ được ưu tiên."})];
-  B.forEach(function(b){nodes.push(el("button",{class:"st-btn g",style:"display:block;width:100%;text-align:left;margin:6px 0;padding:12px 14px",text:"["+b.tag+"] "+b.title,onclick:function(){showBundle(b)}}))});
+  var order=["Heo","Gà Vịt","Gà Đá","Trâu Bò","Dê Cừu","Chó Mèo","Chung"];
+  B.forEach(function(b){if(order.indexOf(b.tag)<0)order.push(b.tag)});
+  order.forEach(function(tg){
+    var list=B.filter(function(b){return b.tag===tg});if(!list.length)return;
+    nodes.push(el("div",{style:"margin:14px 0 4px;font-weight:700;color:#4ade80",text:tg+" ("+list.length+")"}));
+    list.forEach(function(b){nodes.push(el("button",{class:"st-btn g",style:"display:block;width:100%;text-align:left;margin:6px 0;padding:12px 14px",text:b.title,onclick:function(){showBundle(b)}}))});
+  });
   T.show("Bộ thuốc mẫu theo bệnh",nodes);
 }
 T.bundleList=bundleList;
 T.add("🧪  Bộ thuốc mẫu theo bệnh (gợi ý khi khách hỏi)",bundleList);
 }catch(e){console.warn("bundles",e)}
+})();
+
+(function(){
+try{
+var T=window.SOTAY_TOOLS;if(!T||!T.BUNDLES)return;
+function S(t,why,rx,lab){return {t:t,why:why,rx:rx,lab:lab}}
+function A(id,title,tag,ask,steps,warn,note){var o={id:id,title:title,tag:tag,ask:ask,steps:steps,warn:warn};if(note)o.note=note;T.BUNDLES.push(o)}
+var ELE=S("Điện giải, vitamin C","Bù nước, chống stress, giúp phục hồi.","điện giải|electrolyt|vitamin c|glucose","Điện giải, vitamin C");
+var VIT=S("Vitamin tổng hợp, bổ gan","Phục hồi sau bệnh.","vitamin|ade|b-complex|b complex|sorbitol|methionin|choline|silymarin","Vitamin A,D,E, nhóm B, bổ gan");
+var NSAID=S("Hạ sốt, kháng viêm","Giảm sốt, giảm đau để ăn uống lại.","ketoprofen|analgin|meloxicam|flunixin|paracetamol|diclofenac","Ketoprofen, Analgin, Meloxicam");
+var GHICHU="Phác đồ của Viavet (Việt Anh) lấy từ bài viết trên viavet.vn, chỉ tham khảo; sản phẩm Viavet chưa có trong dữ liệu app nên tìm theo hoạt chất.";
+
+/* ===== HEO ===== */
+A("heo-photh","Heo cai sữa sốt, tai tím, tiêu chảy vàng (nghi phó thương hàn)","Heo",
+ ["Heo mấy tuần tuổi? Tai, mặt, bụng có đỏ tím không?","Sốt bao nhiêu độ? Phân vàng loãng hay có máu?","Chết nhanh trong 1-2 ngày hay kéo dài? Bao nhiêu con?"],
+ [S("Kháng sinh nhạy Salmonella","Phó thương hàn do Salmonella: florfenicol, amoxicillin, colistin, enrofloxacin hay dùng; tốt nhất làm kháng sinh đồ.","florfenicol|amoxicillin|colistin|enrofloxacin|ampicillin|gentamicin","Florfenicol, Amoxicillin, Colistin, Enrofloxacin"),
+  NSAID,
+  S("Thuốc tăng đề kháng, beta-glucan","Hỗ trợ phục hồi sau bệnh.","beta.?glucan|vitamin|men vi sinh|gluco","Beta-glucan, vitamin C, men vi sinh"),
+  ELE],
+ ["Heo sốt cao, đỏ da lan rộng, chết nhiều một lúc: loại trừ dịch tả (CSF, ASF) và báo thú y.","Ủ bệnh 3-4 ngày; vệ sinh, sát trùng chuồng 1-2 lần/tuần."],
+ GHICHU+" Phòng: Floazmax 50, Viamoxyl 15S hoặc Ampi-Coli 5-7 ngày mỗi tháng. Điều trị: Az Para C + Beta Glucan C trộn thức ăn 7 ngày; nặng thêm Az.Moxyl 50S trộn thức ăn và Aztosal tiêm.");
+A("heo-ped","Heo con sơ sinh nôn, tiêu chảy nước, chết nhanh (nghi PED/TGE)","Heo",
+ ["Heo mấy ngày tuổi? Bệnh bắt đầu từ ổ nào?","Phân nước vàng hay trắng? Có nôn không?","Heo lớn có tiêu chảy 3-4 ngày rồi tự khỏi không?"],
+ [S("Bù nước, điện giải, giữ ấm","Là bệnh do virus; chết vì mất nước và hạ thân nhiệt nên đây là việc ưu tiên.","điện giải|electrolyt|glucose|oresol","Điện giải, glucose"),
+  S("Kháng sinh chống bội nhiễm","Chỉ để phòng bội nhiễm E. coli, Clostridium; không chữa virus.","colistin|amoxicillin|apramycin|enrofloxacin|neomycin","Colistin, Amoxicillin, Apramycin"),
+  S("Men vi sinh, tăng đề kháng","Giúp phục hồi niêm mạc ruột.","men vi sinh|probiotic|beta.?glucan|vitamin","Men vi sinh, beta-glucan, vitamin C")],
+ ["Heo con dưới 7 ngày chết đến 100%: báo thú y, tăng an toàn sinh học, vaccine PED cho nái.","Tiêm kháng sinh nhiều không làm bệnh virus đỡ hơn."],
+ GHICHU+" Viavet: nano bạc đồng vào nước uống 3-5 ngày; trộn thức ăn Moxycoli Nano, Beta Glucan C, men sống H102; nặng thì tiêm Apracoli + Gluco KC Tosal (+ Azoro LA cho heo trên 30kg).");
+A("heo-cau-trung","Heo con 5-15 ngày tiêu chảy phân vàng, có bọt (nghi cầu trùng)","Heo",
+ ["Heo mấy ngày tuổi? Phân vàng kem có bọt hay có máu?","Kháng sinh đã dùng nhưng không đỡ?","Bao nhiêu phần trăm heo con trong ổ bị?"],
+ [S("Thuốc cầu trùng","Cầu trùng cần thuốc riêng: toltrazuril, diclazuril, sulfa; kháng sinh thường không đủ.","toltrazuril|diclazuril|sulfaquinoxalin|sulfa|amprolium|sulfadimethoxin","Toltrazuril, Diclazuril, Sulfa"),
+  ELE,
+  S("Kháng sinh ruột chống bội nhiễm","Khi phân thối, có sốt.","colistin|amoxicillin|enrofloxacin","Colistin, Amoxicillin")],
+ ["Cầu trùng chẩn đoán bằng soi phân thấy noãn nang.","Tẩy uế chuồng đẻ 2 lần/tuần; chuồng khô sạch."],
+ GHICHU+" Viavet: VIACOCCID, VIACOX, VIA.SBA 30%, VIAQUINO-25 dùng 3-5 ngày; hỗ trợ Ulyte Vit C, điện giải, Viarmasol-1000.");
+A("heo-strep-khop","Heo con, heo cai sữa sưng khớp, què, co giật (liên cầu, Glasser)","Heo",
+ ["Heo mấy tuần tuổi? Sưng khớp một hay nhiều chân?","Có sốt, run rẩy, co giật, bơi chèo?","Ho, khó thở, sưng da bụng?"],
+ [S("Kháng sinh nhạy liên cầu, Haemophilus","Penicillin, amoxicillin, ceftiofur, florfenicol là các lựa chọn quen dùng.","penicillin|amoxicillin|ampicillin|ceftiofur|cefquinome|florfenicol","Penicillin, Amoxicillin, Ceftiofur, Florfenicol"),
+  NSAID,
+  S("Dexamethasone (khi có chỉ định) giảm viêm màng não","Dùng ngắn ngày theo thú y.","dexamethason|prednisolon","Dexamethasone")],
+ ["Heo co giật, bơi chèo: nghi viêm màng não, cần điều trị sớm.","Dexamethasone không dùng cho nái chửa."]);
+A("heo-phu-thung","Heo cai sữa sưng mí mắt, phù đầu, đi loạng choạng, chết đột ngột","Heo",
+ ["Heo vừa cai sữa bao nhiêu ngày? Chết con to, khỏe nhất?","Phù mí mắt, tiếng kêu khàn, đi lảo đảo?","Thức ăn có mới thay hoặc ăn nhiều đột ngột không?"],
+ [S("Kháng sinh nhạy E. coli độc tố","Colistin, enrofloxacin, apramycin, neomycin thường dùng.","colistin|enrofloxacin|apramycin|neomycin|gentamicin|amoxicillin","Colistin, Enrofloxacin, Apramycin"),
+  S("Lợi tiểu, giảm phù (theo thú y)","Hỗ trợ giảm phù.","furosemide|lợi tiểu","Furosemide"),
+  S("Vitamin E, selen, điện giải","Hỗ trợ chống độc tố.","vitamin e|selen|điện giải","Vitamin E, Selen")],
+ ["Bệnh tiến triển rất nhanh; điều chỉnh khẩu phần, giảm đạm giai đoạn đầu sau cai sữa.","Heo đã co giật nằm liệt thường khó cứu."]);
+A("heo-app","Heo sốt cao, ho, thở bụng, chết nhanh (nghi APP, viêm phổi màng phổi)","Heo",
+ ["Heo mấy tháng tuổi? Có chảy máu bọt ở mũi?","Sốt, thở thể bụng, nằm một chỗ?","Có con chết nhanh trong vài giờ không?"],
+ [S("Kháng sinh hô hấp mạnh","Florfenicol, ceftiofur, tulathromycin, amoxicillin thường dùng; tiêm giai đoạn đầu.","florfenicol|ceftiofur|tulathromycin|amoxicillin|cefquinome|tilmicosin","Florfenicol, Ceftiofur, Tulathromycin"),
+  NSAID,
+  S("Long đờm, giãn phế quản","Giúp thở dễ.","bromhexin|acetylcystein|salbutamol|theophyllin|eucalyptol","Bromhexine, Acetylcystein")],
+ ["Tilmicosin không tiêm cho heo.","Cải thiện thông gió, giảm mật độ."]);
+A("heo-nai-mma","Nái sau đẻ sốt, mất sữa, vú sưng cứng, ra dịch (MMA, viêm tử cung)","Heo",
+ ["Nái đẻ bao lâu? Sốt bao nhiêu độ?","Vú sưng nóng, sữa ít hay không có? Dịch âm đạo màu gì, có mùi?","Heo con bú yếu, tiêu chảy?"],
+ [S("Kháng sinh tiêm","Amoxicillin, ceftiofur, penicillin + streptomycin, enrofloxacin phổ biến.","amoxicillin|ceftiofur|penicillin|streptomycin|enrofloxacin|florfenicol|cefquinome","Amoxicillin, Ceftiofur, Penicillin-Streptomycin"),
+  S("Oxytocin, cho tử cung co bóp","Thải dịch, kích sữa; chỉ dùng khi chắc chắn không còn heo con trong bụng.","oxytocin|prostaglandin|cloprostenol","Oxytocin, Cloprostenol"),
+  NSAID,
+  S("Rửa tử cung, bơm thuốc","Theo hướng dẫn của thú y.","povidone|betadine|iod|kháng sinh bơm tử cung","Dung dịch sát trùng nhẹ")],
+ ["Chia heo con ghép bú nái khác hoặc cho uống sữa thay thế.","Ngưng thuốc trước khi bán thịt nái loại."]);
+A("heo-sot-nhau","Nái đẻ xong chưa ra nhau, ra nhau chậm","Heo",
+ ["Đẻ xong bao lâu chưa ra nhau? Sốt không?","Đã dùng oxytocin chưa?","Có ra dịch hôi không?"],
+ [S("Oxytocin hoặc thuốc co tử cung","Giúp tống nhau thai.","oxytocin|cloprostenol|prostaglandin","Oxytocin, Cloprostenol"),
+  S("Kháng sinh phòng viêm tử cung","Dùng sớm sau khi đẻ.","amoxicillin|ceftiofur|penicillin|enrofloxacin","Amoxicillin, Ceftiofur"),
+  VIT],
+ ["Nhau thai không được kéo bằng tay mạnh.","Theo dõi sốt, mùi dịch trong 3-5 ngày."]);
+A("heo-ghe","Heo ngứa, gãi, da dày vảy, ghẻ","Heo",
+ ["Da có vảy, ngứa nhiều, tróc lông?","Heo nái hay heo con? Cả đàn hay một vài con?","Có bị giun sán, chấy rận không?"],
+ [S("Ivermectin hoặc doramectin","Ghẻ, chấy rận, giun; tiêm hoặc trộn thức ăn.","ivermectin|doramectin|abamectin|moxidectin|eprinomectin","Ivermectin, Doramectin"),
+  S("Sát trùng tại chỗ, tắm","Giảm ngứa, diệt ve mạt.","amitraz|deltamethrin|cypermethrin|permethrin|diazinon","Amitraz, Deltamethrin"),
+  S("Kháng sinh trị nhiễm trùng da kế phát","Nếu da trầy mủ.","amoxicillin|penicillin|lincomycin|oxytetracycline","Amoxicillin, Oxytetracycline")],
+ ["Nái chửa: hỏi thú y trước khi dùng thuốc tắm mạnh.","Xử lý cả chuồng và đàn cùng lúc, lặp lại sau 14-21 ngày."]);
+A("heo-giun","Heo ăn nhiều nhưng gầy, chậm lớn, lông xù (giun sán)","Heo",
+ ["Heo mấy tuần tuổi? Lần tẩy giun gần nhất khi nào?","Có ho, tiêu chảy không?","Thức ăn, nguồn nước thế nào?"],
+ [S("Thuốc tẩy giun","Albendazole, fenbendazole, levamisole, ivermectin tùy loại giun.","albendazole|fenbendazole|levamisole|ivermectin|pyrantel|mebendazole","Albendazole, Fenbendazole, Levamisole"),
+  VIT],
+ ["Tẩy giun lặp lại sau 21 ngày; tẩy cho nái trước khi đẻ.","Kiểm soát ký sinh trùng trong chuồng bằng vệ sinh."]);
+A("heo-viem-da","Heo con da dầu, rỉ dịch nâu, mụn mủ (viêm da tiết dịch)","Heo",
+ ["Heo mấy ngày tuổi? Da có dịch nhờn nâu đen?","Bao nhiêu con trong ổ?","Chuồng có sàn thô, nhiều mài mòn không?"],
+ [S("Kháng sinh nhạy Staphylococcus","Amoxicillin, lincomycin, ceftiofur, penicillin thường dùng.","amoxicillin|lincomycin|ceftiofur|penicillin|cefalexin","Amoxicillin, Lincomycin, Ceftiofur"),
+  S("Sát trùng ngoài da, tắm","Làm sạch dịch tiết.","povidone|iod|chlorhexidine|betadine","Povidone iodine, Chlorhexidine"),
+  ELE],
+ ["Heo con bị nặng mất nước, cần bù dịch.","Cắt móng, làm mềm sàn chuồng, khử trùng chuồng đẻ."]);
+A("heo-cai-sua-con","Heo cai sữa còi, chậm lớn, lông xù","Heo",
+ ["Heo cai sữa bao nhiêu ngày? Có hay tiêu chảy tái đi tái lại?","Đã tẩy giun chưa?","Ăn cám nào, uống nước nguồn nào?"],
+ [S("Men vi sinh, hỗ trợ tiêu hóa","Ổn định ruột sau cai sữa.","men vi sinh|probiotic|enzyme|men tiêu hóa","Men vi sinh, enzyme"),
+  S("Tẩy giun nếu chưa","Giun ăn dinh dưỡng.","albendazole|fenbendazole|levamisole|ivermectin","Albendazole, Levamisole"),
+  VIT,
+  S("Vitamin C, điện giải","Giảm stress cai sữa.","điện giải|vitamin c","Điện giải, vitamin C")],
+ ["Kiểm tra thức ăn, nước, nhiệt độ chuồng; bệnh hô hấp ghép như PRRS, PCV2 cần xét nghiệm."]);
+A("heo-sau-tiem","Heo sau tiêm vaccine bỏ ăn, sốt nhẹ, mệt","Heo",
+ ["Tiêm vaccine gì, cách đây bao lâu?","Sốt, sưng chỗ tiêm, bỏ ăn?","Có biểu hiện khó thở, nôn, sụp?"],
+ [ELE,
+  S("Hạ sốt nhẹ","Giảm sốt phản ứng sau vaccine.","paracetamol|analgin|ketoprofen","Paracetamol, Analgin"),
+  VIT],
+ ["Phản ứng nặng (khó thở, lả, nổi mề đay): cần adrenalin và báo thú y.","Không dùng kháng sinh liên tục sau vaccine vi khuẩn sống."]);
+
+/* ===== GÀ VỊT ===== */
+A("ga-cau-trung","Gà phân có máu, xù lông, chụm lại (cầu trùng)","Gà Vịt",
+ ["Gà mấy tuần tuổi? Phân máu tươi hay máu cà chua?","Sàn chuồng có ẩm, mật độ cao?","Đã dùng thuốc cầu trùng nào gần đây?"],
+ [S("Thuốc cầu trùng","Toltrazuril, amprolium, sulfaquinoxaline, diclazuril: luân phiên để tránh kháng.","toltrazuril|amprolium|sulfaquinoxalin|diclazuril|sulfa|clopidol","Toltrazuril, Amprolium, Sulfa, Diclazuril"),
+  S("Vitamin K, A","Cầm máu, phục hồi niêm mạc ruột.","vitamin k|vitamin a|vitamin","Vitamin K3, A"),
+  ELE],
+ ["Đổi thuốc cầu trùng luân phiên; chuồng khô, thay chất độn ẩm.","Gà đẻ trứng ăn: kiểm tra thời gian ngưng thuốc."]);
+A("ga-newcastle","Gà bỏ ăn, phân xanh trắng, xoắn cổ, chết nhanh (nghi Newcastle)","Gà Vịt",
+ ["Gà mấy tuần tuổi? Có tiêm vaccine Newcastle chưa?","Phân xanh trắng, mào tím, xoắn cổ, liệt?","Chết bao nhiêu phần trăm đàn?"],
+ [S("Chăm sóc hỗ trợ, điện giải, vitamin","Không có thuốc đặc trị virus; hỗ trợ nâng đỡ.","điện giải|vitamin c|vitamin|glucose","Điện giải, vitamin C, ADE"),
+  S("Kháng sinh phòng bội nhiễm","Chỉ chống nhiễm khuẩn kế phát.","enrofloxacin|amoxicillin|doxycycline|colistin","Enrofloxacin, Amoxicillin, Doxycycline")],
+ ["Nghi Newcastle: cách ly, báo thú y, tiêm vaccine cho đàn khỏe; tiêu hủy gà chết đúng cách.","Kháng sinh không chữa được virus."]);
+A("ga-gumboro","Gà 3-6 tuần tiêu chảy trắng, xù lông, rũ cánh (nghi Gumboro)","Gà Vịt",
+ ["Gà mấy ngày tuổi? Tiêm vaccine Gumboro chưa?","Phân trắng loãng, hậu môn dính phân, run?","Chết nhiều ngày 3-5 sau khi bệnh?"],
+ [S("Điện giải, vitamin, bổ thận","Hỗ trợ khi tổn thương túi Fabricius, thận.","điện giải|vitamin|sorbitol|methionin|silymarin|kali","Điện giải, vitamin C, K"),
+  S("Kháng sinh phòng bội nhiễm","Thường ghép E. coli, Salmonella.","enrofloxacin|amoxicillin|colistin|doxycycline|florfenicol","Enrofloxacin, Amoxicillin"),
+  S("Thuốc bổ gan, thận","Hỗ trợ giải độc.","sorbitol|methionin|choline|silymarin|gan","Sorbitol, Methionin")],
+ ["Virus Gumboro làm suy giảm miễn dịch, đàn dễ bệnh kế phát.","Giữ ấm, giảm stress, hạn chế dùng thuốc độc thận."]);
+A("ga-coryza","Gà sưng mặt, chảy nước mũi hôi, mắt dính (coryza)","Gà Vịt",
+ ["Gà đẻ hay thịt? Sưng mặt một bên hay hai bên?","Dịch mũi đặc, hôi?","Đã chữa bao lâu, thuốc gì?"],
+ [S("Kháng sinh nhạy Avibacterium","Sulfa, erythromycin, ampicillin, doxycycline, enrofloxacin tùy đàn.","sulfa|erythromycin|ampicillin|doxycycline|enrofloxacin|amoxicillin|florfenicol|streptomycin","Sulfa, Erythromycin, Doxycycline, Enrofloxacin"),
+  S("Vitamin A, C","Phục hồi niêm mạc mũi.","vitamin a|vitamin c|vitamin","Vitamin A, C"),
+  S("Sát trùng chuồng, nước","Giảm mầm bệnh.","iod|chlorhexidine|benzalkonium|virkon","Iodine, Benzalkonium")],
+ ["Gà đã nhiễm có thể mang trùng lâu; vaccine coryza cho đàn đẻ.","Gà đẻ: kiểm tra ngưng thuốc trước khi bán trứng."],
+ "Tham khảo bài Viavet về gà giao mùa: ORT, Coryza, APV có biểu hiện giống nhau, nên lấy mẫu xét nghiệm nếu kéo dài.");
+A("ga-ecoli-keo-mang","Gà mổ thấy màng trắng ở túi khí, bao tim, quanh gan (E. coli)","Gà Vịt",
+ ["Gà mấy tuần tuổi? Có bệnh hô hấp trước đó không?","Mổ khám thấy màng fibrin ở đâu?","Chuồng ẩm, nhiều bụi, amoniac?"],
+ [S("Kháng sinh tiêm hoặc uống nhạy E. coli","Lincomycin + spectinomycin, enrofloxacin, florfenicol, cefalexin thường dùng; nếu tái phát làm kháng sinh đồ.","lincomycin|spectinomycin|enrofloxacin|florfenicol|cefalexin|ceftiofur|colistin|amoxicillin","Lincospec, Enrofloxacin, Florfenicol, Cefalexin"),
+  S("Kháng viêm, tiêu fibrin","Giúp tan màng giả.","chymotrypsin|trypsin|alfachymotrypsin|serratiopeptidase|bromelain","Alpha-chymotrypsin, Trypsin"),
+  S("Hạ sốt, giảm đau","Khi gà sốt, bỏ ăn.","analgin|paracetamol|ketoprofen","Analgin + vitamin C"),
+  S("Bổ gan, điện giải","Phục hồi.","sorbitol|methionin|choline|silymarin|điện giải","Sorbitol, Methionin, điện giải")],
+ ["Xử lý nguồn: giảm bụi, amoniac, mật độ; kiểm soát Mycoplasma, IB.","Gà đẻ: kiểm tra ngưng thuốc trước khi bán trứng, thịt."],
+ GHICHU+" Phác đồ tiêm Viavet: LINCOSPEC + ACHYMOSIN + VIA.GINE+C; phác đồ uống: sáng ACELEXIN, trưa ALCHYMOSIN ORAL, tối VIA.HEPA + AZTOSAL ORAL.");
+A("ga-ort-giao-mua","Gà giao mùa khò khè, vươn cổ thở, chảy mũi kéo dài (ORT, APV, hô hấp phức hợp)","Gà Vịt",
+ ["Gà bao nhiêu tuần? Khò khè ban đêm, sáng sớm?","Sưng mặt, giảm đẻ không?","Chuồng đóng kín, nền ẩm, amoniac nồng?"],
+ [S("Kháng sinh hô hấp","ORT, Mycoplasma, E. coli: doxycycline, tylosin, florfenicol, enrofloxacin, amoxicillin; nên xét nghiệm nếu kéo dài.","doxycycline|tylosin|florfenicol|enrofloxacin|amoxicillin|tiamulin|tilmicosin","Doxycycline, Tylosin, Florfenicol, Amoxicillin"),
+  S("Long đờm, hỗ trợ hô hấp","Giúp thông thoáng.","bromhexin|acetylcystein|eucalyptol|menthol","Bromhexine"),
+  S("Vitamin A, C, điện giải","Giảm stress thời tiết.","vitamin a|vitamin c|điện giải","Vitamin A, C"),
+  S("Sát trùng chuồng","Giảm mầm bệnh trong không khí.","iod|benzalkonium|chlorhexidine|virkon","Iodine, Benzalkonium")],
+ ["Giữ chuồng thông thoáng, khô, amoniac dưới 25 ppm tại tầm gà.","Khò khè không phải tên một bệnh; ca kéo dài nên lấy mẫu xét nghiệm."],
+ "Theo bài Viavet về gà giao mùa: kiểm tra đàn sớm, chuồng khô, thông thoáng, nước máng sạch, ghi chép diễn biến.");
+A("ga-giun","Gà ăn nhiều nhưng gầy, phân có giun, chậm lớn (giun sán)","Gà Vịt",
+ ["Lần tẩy giun gần nhất khi nào?","Thấy giun trong phân hoặc mổ khám?","Gà nuôi thả hay nhốt?"],
+ [S("Thuốc tẩy giun sán","Albendazole, levamisole, fenbendazole, praziquantel tùy loại.","albendazole|levamisole|fenbendazole|praziquantel|piperazin|ivermectin","Albendazole, Levamisole, Fenbendazole"),VIT],
+ ["Gà đẻ trứng ăn: kiểm tra thời gian ngưng thuốc.","Tẩy lặp lại sau 21-30 ngày, vệ sinh chuồng."]);
+A("ga-nam-doc-to","Gà ăn kém, chậm lớn, thức ăn có mốc (độc tố nấm mốc, Aspergillus)","Gà Vịt",
+ ["Thức ăn có mốc, đóng bánh, mùi lạ?","Chất độn chuồng ẩm lâu ngày?","Gà non khó thở, há mỏ?"],
+ [S("Thay thức ăn, chất hấp phụ độc tố","Không có thuốc đặc hiệu đơn giản; loại thức ăn mốc, thêm chất hấp phụ.","hấp phụ|bentonit|toxin|mycotoxin|zeolit|than hoạt","Chất hấp phụ độc tố nấm mốc"),
+  S("Bổ gan, thận","Giải độc, hỗ trợ.","sorbitol|methionin|choline|silymarin|gan","Sorbitol, Methionin, Choline"),
+  ELE],
+ ["Thức ăn mốc loại bỏ hoàn toàn; chuồng, kho khô thoáng.","Gà non khó thở nghi Aspergillus: vệ sinh máy ấp, chuồng úm."],
+ "Theo bài Viavet về nấm và độc tố nấm mốc ở gia cầm.");
+A("ga-con-con-coc","Gà con còi cọc, cong chân, yếu chân","Gà Vịt",
+ ["Gà mấy ngày tuổi? Chân cong, đi bằng khớp gối?","Thức ăn gì, có bổ sung canxi, vitamin D3?","Chuồng có nắng không?"],
+ [S("Canxi, phospho, vitamin D3","Phòng còi xương, yếu chân.","canxi|calcium|phospho|vitamin d|d3","Canxi, Phospho, Vitamin D3"),
+  VIT],
+ ["Kiểm tra khẩu phần canxi, phospho; chuồng ấm, có ánh sáng."]);
+A("ga-de-giam-de","Gà đẻ giảm đẻ, trứng nhỏ, vỏ mỏng","Gà Vịt",
+ ["Giảm đẻ bao nhiêu phần trăm, từ khi nào?","Vỏ mỏng, trứng dị dạng?","Có hô hấp hay tiêu chảy kèm theo?"],
+ [S("Canxi, vitamin D3, khoáng","Cải thiện vỏ trứng.","canxi|calcium|vitamin d|d3|phospho|khoáng","Canxi, Vitamin D3, khoáng"),
+  S("Vitamin tổng hợp, bổ gan","Hỗ trợ buồng trứng, gan.","vitamin|ade|methionin|choline|sorbitol","Vitamin A,D,E, Methionin, Choline"),
+  S("Kháng sinh (nếu có nhiễm khuẩn)","Chỉ khi có bệnh hô hấp, E. coli.","enrofloxacin|doxycycline|amoxicillin|florfenicol","Doxycycline, Amoxicillin")],
+ ["Giảm đẻ có thể do virus (EDS, IB, Newcastle, cúm): xét nghiệm và vaccine.","Kiểm tra ngưng thuốc trước khi bán trứng."]);
+A("vit-tembusu","Vịt đẻ giảm trứng, đi loạng choạng, lật ngửa (nghi Tembusu)","Gà Vịt",
+ ["Vịt đẻ giảm trứng bao nhiêu phần trăm?","Đi loạng choạng, lật ngửa, run đầu?","Có nhiều muỗi, thời tiết nóng ẩm?"],
+ [S("Chăm sóc hỗ trợ: vitamin, điện giải","Là bệnh do virus; kháng sinh không diệt virus.","điện giải|vitamin c|vitamin|methionin|choline|sorbitol","Vitamin C, điện giải, Methionin, Choline"),
+  S("Sát trùng chuồng, diệt côn trùng","Giảm lây lan.","iod|benzalkonium|chlorhexidine|virkon|permethrin|cypermethrin","Iodine, Benzalkonium"),
+  S("Kháng sinh chống bội nhiễm khi cần","Chỉ khi có nhiễm khuẩn kế phát.","enrofloxacin|amoxicillin|colistin","Enrofloxacin")],
+ ["Tách vịt yếu, không để lật ngửa lâu; kiểm soát muỗi.","Vịt đẻ: hỏi thú y ngưng thuốc trước khi lấy trứng."],
+ GHICHU+" Viavet: Liquid Health KTMD 2ml/lít nước, Ulyte Vit-C 200g/100 lít nước; Viaenro chỉ khi có bội nhiễm vi khuẩn.");
+A("vit-tieu-chay","Vịt, ngan tiêu chảy, bại huyết","Gà Vịt",
+ ["Vịt mấy tuần tuổi? Phân loãng xanh trắng hay có máu?","Có liệt chân, run đầu, bại huyết?","Có hô hấp kèm theo?"],
+ [S("Kháng sinh nhạy E. coli, Salmonella","Enrofloxacin, colistin, amoxicillin, florfenicol thường dùng.","enrofloxacin|colistin|amoxicillin|florfenicol|gentamicin","Enrofloxacin, Colistin, Amoxicillin"),ELE,VIT],
+ ["Vịt nuôi nước, đảm bảo nước sạch; tiêm vaccine vịt (Duck plague, viêm gan).","Vịt đẻ: ngưng thuốc trước khi lấy trứng."]);
+A("ga-ngoai-ky-sinh","Gà ngứa, mổ xơ lông, mạt, rận, ve","Gà Vịt",
+ ["Thấy mạt, rận trên da, quanh hậu môn?","Gà đẻ bỏ ổ, giảm đẻ?","Nuôi nhốt hay thả?"],
+ [S("Thuốc diệt ve mạt rận","Phun, tắm, hoặc ivermectin.","ivermectin|permethrin|cypermethrin|deltamethrin|amitraz|abamectin","Ivermectin, Cypermethrin"),VIT],
+ ["Xử lý cả chuồng, ổ đẻ; lặp lại sau 7-10 ngày.","Gà đẻ: kiểm tra ngưng thuốc."]);
+
+/* ===== GÀ ĐÁ ===== */
+A("gada-kho","Gà đá khò, khẹc, hen, sổ mũi","Gà Đá",
+ ["Gà tre hay gà nòi? Cân nặng bao nhiêu?","Khò khè, chảy nước mũi, há mỏ thở?","Bệnh bao lâu? Đã tiêm thuốc gì?"],
+ [S("Bộ đặc trị gà khò (marbofloxacin + Hexin)","Bộ của Achaupharm, pha 1:1, tiêm bắp 3-5 ngày.","marbofloxacin|hexin|enrofloxacin|doxycycline|tylosin|lincomycin","Marbofloxacin, Enrofloxacin, Doxycycline, Lincomycin"),
+  S("Lincomycin tiêm","Viêm khớp, gà khò, hen.","lincomycin","Lincomycin"),
+  S("Vitamin A, C, long đờm","Phục hồi hô hấp.","vitamin a|vitamin c|bromhexin|vitamin","Vitamin A, C, Bromhexine")],
+ ["Ghi rõ thời gian ngưng thuốc theo nhãn sản phẩm.","Chuồng thoáng, tránh gió lùa, giữ ấm."]);
+A("gada-hoi-phuc","Gà đá sau trận đấu: vết thương, đuối sức, tụ máu","Gà Đá",
+ ["Gà bị thương ở đâu, sâu, chảy máu?","Gà tre hay gà nòi? Cân nặng?","Thở dốc, mệt lả?"],
+ [S("Bộ đặc trị tổn thương sau thi đấu (Speclin D + Alpha-T)","Bộ của Achaupharm, tiêm bắp 3-5 ngày.","speclin|alpha-t|alpha|spectinomycin|lincomycin|chymotrypsin","Speclin D, Alpha-T, Lincomycin + Spectinomycin"),
+  S("Sát trùng, cầm máu vết thương","Làm sạch vết thương.","povidone|iod|chlorhexidine|vitamin k|cầm máu","Povidone iodine, Vitamin K"),
+  S("Bổ máu, điện giải","Phục hồi sức.","hemovit|b12|sắt|điện giải|vitamin","Vitamin B12, sắt, điện giải")],
+ ["Vết thương sâu vào ngực, bụng: cần thú y.","Chuồng riêng khô sạch trong thời gian hồi phục."]);
+A("gada-bo-mau","Gà đá thiếu máu, mào nhợt, yếu","Gà Đá",
+ ["Mào, tích nhợt nhạt?","Gà tre hay gà nòi? Cân nặng?","Có ký sinh trùng máu, giun, cầu trùng không?"],
+ [S("Thuốc bổ máu: sắt, B12, folic","Hemovit, Hemoric: tạo hồng cầu.","hemovit|hemoric|b12|sắt|iron|folic|vitamin b12","Vitamin B12, Sắt, Folic acid"),
+  S("Tẩy giun, cầu trùng","Loại nguyên nhân hao máu.","albendazole|levamisole|toltrazuril|sulfa|amprolium","Albendazole, Toltrazuril"),
+  VIT],
+ ["Gà đá bổ máu liều theo nhãn (ví dụ Hemoric: gà đá 0,3-0,5 ml/con/ngày tùy sản phẩm).","Xử lý nguyên nhân (ký sinh trùng) trước khi bổ."]);
+A("gada-tang-luc","Gà đá bồi dưỡng sức trước trận (sản phẩm tăng lực, bổ trợ)","Gà Đá",
+ ["Gà tre hay gà nòi? Cân nặng bao nhiêu?","Bao nhiêu ngày nữa đến trận?","Tình trạng sức khỏe: không bệnh, không dùng kháng sinh?"],
+ [S("Bộ tăng lực chiến kê (Cytasal + Denosen)","Bộ Achaupharm, Cytasal uống 2-7 ngày trước, Denosen tiêm bắp 1 giờ trước; ngày đấu không dùng Cytasal.","cytasal|denosen|b15|panvit|e\\.?perfect","Cytasal, Denosen, Panvit B15, E.Perfect"),
+  S("Vitamin B15, E","Tăng sức bền, hỗ trợ cơ.","panvit|pangamic|b15|vitamin e|e\\.?perfect","Vitamin B15, Vitamin E"),
+  S("Bổ máu","Tạo nước máu tốt.","hemovit|b12|sắt|vitamin b12","Vitamin B12, sắt")],
+ ["Chỉ dùng cho gà khỏe, theo đúng liều nhà sản xuất.","Kiểm tra quy định nơi thi đấu về chất bổ trợ."]);
+A("gada-giun-ky-sinh","Gà đá tẩy giun, cầu trùng, ký sinh ngoài định kỳ","Gà Đá",
+ ["Lần tẩy gần nhất? Gà nhốt hay thả?","Có phân máu, gầy, lông xù?","Cân nặng, gà tre hay gà nòi?"],
+ [S("Tẩy giun","Albendazole, levamisole, fenbendazole.","albendazole|levamisole|fenbendazole|praziquantel|ivermectin","Albendazole, Levamisole, Ivermectin"),
+  S("Thuốc cầu trùng","Toltrazuril, amprolium, sulfa.","toltrazuril|amprolium|sulfa|diclazuril","Toltrazuril, Amprolium"),
+  S("Diệt ve mạt rận","Phun hoặc ivermectin.","ivermectin|permethrin|cypermethrin","Ivermectin, Cypermethrin")],
+ ["Tẩy giun cách xa ngày thi đấu; lặp lại sau 21-30 ngày."]);
+A("gada-tieu-chay","Gà đá tiêu chảy, phân xanh, lỏng","Gà Đá",
+ ["Phân màu gì, có máu, bọt, mùi?","Gà tre hay gà nòi? Cân nặng?","Có sốt, bỏ ăn, ủ rũ?"],
+ [S("Kháng sinh đường ruột","Enrofloxacin, colistin, amoxicillin, neomycin.","enrofloxacin|colistin|amoxicillin|neomycin|florfenicol","Enrofloxacin, Colistin, Amoxicillin"),
+  S("Nếu phân máu: thuốc cầu trùng","Toltrazuril, amprolium, sulfa.","toltrazuril|amprolium|sulfa|diclazuril","Toltrazuril, Amprolium"),
+  S("Men vi sinh, điện giải","Phục hồi ruột.","men vi sinh|probiotic|điện giải|vitamin","Men vi sinh, điện giải")],
+ ["Không cho thức ăn ôi thiu; nước sạch, vệ sinh máng."]);
+
+/* ===== TRÂU BÒ ===== */
+A("bo-sot-nhau","Bò đẻ xong sót nhau, viêm tử cung, ra dịch hôi","Trâu Bò",
+ ["Bò đẻ bao lâu chưa ra nhau? Sốt không?","Dịch âm đạo màu gì, mùi?","Còn cho sữa, sản lượng giảm?"],
+ [S("Kháng sinh tiêm","Penicillin + streptomycin, ceftiofur, oxytetracycline, amoxicillin.","penicillin|streptomycin|ceftiofur|oxytetracycline|amoxicillin|cefquinome","Penicillin-Streptomycin, Ceftiofur"),
+  S("Oxytocin, prostaglandin","Co tử cung, thải nhau.","oxytocin|cloprostenol|prostaglandin","Oxytocin, Cloprostenol"),
+  NSAID,VIT],
+ ["Bỏ sữa trong thời gian ngưng thuốc.","Không kéo nhau thai mạnh bằng tay."]);
+A("bo-chuong-hoi","Bò bụng trái căng cứng, khó thở (chướng hơi dạ cỏ)","Trâu Bò",
+ ["Bụng trái căng khi nào, sau ăn gì?","Thở khó, há miệng, chảy dãi?","Bò còn đứng được không?"],
+ [S("Thuốc chống đầy hơi","Giải phóng hơi.","simethicone|dầu|poloxalene|tympanol|baking soda|chống đầy hơi","Simethicone, dầu thực vật"),
+  S("Metoclopramide, hỗ trợ nhu động","Kích thích dạ cỏ.","metoclopramide|neostigmin|nhu động","Metoclopramide"),
+  S("Chọc dò dạ cỏ (thú y)","Khi nguy kịch.","(không có sản phẩm)","Chọc trocar")],
+ ["Bụng căng nhanh, khó thở là cấp cứu, gọi thú y ngay.","Không cho ăn cỏ non, thức ăn lên men."]);
+A("bo-ky-sinh-mau","Bò sốt, thiếu máu, vàng da, nước tiểu đỏ (ký sinh trùng đường máu)","Trâu Bò",
+ ["Bò sốt từng cơn, niêm mạc nhợt hoặc vàng?","Có ve bám nhiều, nuôi vùng nào?","Nước tiểu đỏ sẫm?"],
+ [S("Thuốc trị ký sinh trùng máu","Diminazene, imidocarb, oxytetracycline theo chỉ định.","diminazene|imidocarb|oxytetracycline|berenil","Diminazene, Imidocarb, Oxytetracycline"),
+  S("Bổ máu, vitamin B12","Phục hồi sau thiếu máu.","b12|sắt|iron|vitamin b12|hemovit","Vitamin B12, sắt"),
+  S("Diệt ve","Phòng tái nhiễm.","ivermectin|cypermethrin|deltamethrin|amitraz","Ivermectin, Cypermethrin")],
+ ["Diệt ve cả chuồng và bò đồng thời.","Tránh liều diminazene vượt khuyến cáo."]);
+A("bo-hohap-be","Bê, nghé ho, thở khó, sốt (viêm phổi)","Trâu Bò",
+ ["Bê mấy tuần tuổi? Sốt, chảy mũi, ho ướt?","Thời tiết lạnh, ẩm?","Đã bú sữa đầu đủ chưa?"],
+ [S("Kháng sinh hô hấp","Florfenicol, tulathromycin, oxytetracycline, ceftiofur, enrofloxacin.","florfenicol|tulathromycin|oxytetracycline|ceftiofur|enrofloxacin|tilmicosin","Florfenicol, Oxytetracycline, Ceftiofur"),
+  NSAID,
+  S("Long đờm","Thông thoáng đường thở.","bromhexin|acetylcystein","Bromhexine")],
+ ["Chuồng khô, thoáng, tránh gió lùa.","Bê nặng cần theo dõi nhiệt độ và hô hấp."]);
+A("bo-san-la-gan","Bò gầy, tiêu chảy kéo dài, phù hàm (sán lá gan, giun)","Trâu Bò",
+ ["Bò chăn thả vùng nước ẩm, có ăn cỏ ven ao?","Hàm dưới phù, gầy dần?","Lần tẩy gần nhất?"],
+ [S("Thuốc tẩy sán lá gan","Triclabendazole, albendazole, closantel, nitroxynil.","triclabendazole|albendazole|closantel|nitroxynil|oxyclozanide|clorsulon","Triclabendazole, Albendazole, Closantel"),
+  S("Tẩy giun tròn","Ivermectin, levamisole.","ivermectin|levamisole|fenbendazole","Ivermectin, Levamisole"),VIT],
+ ["Kiểm tra thời gian ngưng thuốc trước khi giết thịt hoặc vắt sữa."]);
+
+/* ===== DÊ CỪU ===== */
+A("de-tieu-chay","Dê, cừu tiêu chảy, phân lỏng, gầy (cầu trùng, vi khuẩn)","Dê Cừu",
+ ["Dê mấy tháng tuổi? Phân máu, bọt?","Chuồng ẩm, mật độ cao?","Lần tẩy giun gần nhất?"],
+ [S("Thuốc cầu trùng","Sulfa, toltrazuril, amprolium.","sulfa|toltrazuril|amprolium|diclazuril","Sulfa, Toltrazuril, Amprolium"),
+  S("Kháng sinh nhạy E. coli","Enrofloxacin, colistin, amoxicillin.","enrofloxacin|colistin|amoxicillin|oxytetracycline","Enrofloxacin, Amoxicillin"),ELE],
+ ["Dê con dễ mất nước, ưu tiên điện giải.","Tách dê bệnh, chuồng khô."]);
+A("de-hohap","Dê ho, sổ mũi, thở khó (viêm phổi)","Dê Cừu",
+ ["Dê ho, khò khè, chảy mũi, sốt?","Thời tiết lạnh, mưa ẩm?","Có nhiều con cùng bị?"],
+ [S("Kháng sinh hô hấp","Oxytetracycline, tylosin, florfenicol, enrofloxacin.","oxytetracycline|tylosin|florfenicol|enrofloxacin|tilmicosin","Oxytetracycline, Tylosin, Florfenicol"),
+  NSAID,
+  S("Long đờm","Thông thoáng đường thở.","bromhexin|acetylcystein","Bromhexine")],
+ ["Dê rất nhạy với một số thuốc: không tiêm tilmicosin."]);
+
+/* ===== CHÓ MÈO ===== */
+A("cho-parvo","Chó con nôn, tiêu chảy máu, bỏ ăn, bẩn (nghi Parvo)","Chó Mèo",
+ ["Chó mấy tháng tuổi? Tiêm vaccine chưa?","Nôn, phân máu tanh, sốt?","Bệnh bao lâu?"],
+ [S("Truyền dịch, bù nước, điện giải","Là việc quan trọng nhất.","điện giải|ringer|glucose|nacl|natri clorid","Ringer lactate, Natri clorid"),
+  S("Chống nôn","Giảm nôn để uống thuốc, ăn.","metoclopramide|maropitant|ondansetron","Metoclopramide"),
+  S("Kháng sinh chống bội nhiễm","Phòng nhiễm trùng ruột.","ampicillin|amoxicillin|cefotaxim|ceftriaxone|gentamicin|enrofloxacin","Amoxicillin, Ceftriaxone")],
+ ["Parvo nguy hiểm, cần thú y truyền dịch; cách ly chó bệnh.","Tránh dùng thuốc cầm tiêu chảy ức chế nhu động."]);
+A("cho-ghe-nam","Chó mèo ngứa, rụng lông, da có vảy, mụn (ghẻ, nấm da)","Chó Mèo",
+ ["Rụng lông từng mảng tròn hay ngứa toàn thân?","Da có vảy, mủ, mùi?","Nuôi chung với thú khác?"],
+ [S("Thuốc trị ghẻ, ve","Ivermectin, selamectin, amitraz tắm.","ivermectin|selamectin|amitraz|fipronil","Ivermectin, Selamectin, Amitraz"),
+  S("Thuốc trị nấm da","Griseofulvin, ketoconazole, itraconazole, tắm sát trùng.","griseofulvin|ketoconazol|itraconazol|clotrimazol|miconazol|nystatin","Griseofulvin, Ketoconazole, Miconazole"),
+  S("Kháng sinh nếu da mủ","Cefalexin, amoxicillin, lincomycin.","cefalexin|amoxicillin|lincomycin|clindamycin","Cefalexin, Amoxicillin")],
+ ["Ivermectin không dùng cho giống collie, sheltie, mèo nhỏ liều cao.","Xử lý chuồng, đồ dùng; nấm da có thể lây sang người."]);
+A("cho-tieu-chay","Chó mèo tiêu chảy, nôn nhẹ, bỏ ăn","Chó Mèo",
+ ["Tiêu chảy mấy ngày, có máu hay chất nhầy?","Nôn, sốt, bỏ ăn?","Chó mèo đã tẩy giun, tiêm vaccine chưa?"],
+ [S("Điện giải","Chống mất nước.","điện giải|oresol|ringer","Điện giải"),
+  S("Men vi sinh, thuốc ruột","Ổn định đường ruột.","men vi sinh|probiotic|smecta|diosmectit|kaolin","Men vi sinh, Diosmectite"),
+  S("Kháng sinh đường ruột nhẹ","Metronidazole hoặc amoxicillin theo chỉ định.","metronidazol|amoxicillin|neomycin|colistin","Metronidazole, Amoxicillin")],
+ ["Phân máu, nôn nhiều, sốt, chó con: khả năng parvo, đưa đến thú y.","Cho nhịn ăn ngắn, ăn nhẹ sau đó."]);
+A("cho-ho-cui","Chó ho khan, ho từng cơn, khạc bọt (ho cũi chó)","Chó Mèo",
+ ["Ho khan như hóc xương, từng cơn?","Có sốt, chảy mũi, bỏ ăn?","Nuôi chung nhiều chó, mới mua?"],
+ [S("Kháng sinh hô hấp","Doxycycline, amoxicillin + clavulanate theo chỉ định.","doxycycline|amoxicillin|clavulan|enrofloxacin","Doxycycline, Amoxicillin-Clavulanate"),
+  S("Giảm ho, long đờm","Làm dịu ho.","bromhexin|acetylcystein|dextromethorphan|butorphanol","Bromhexine, Acetylcystein")],
+ ["Chó ho nặng kèm sốt, thở khó: có thể viêm phổi, cần thú y.","Tách chó bệnh khỏi đàn."]);
+A("meo-cum","Mèo hắt hơi, chảy mũi, mắt có ghèn, sốt (cúm mèo)","Chó Mèo",
+ ["Mèo mấy tháng tuổi? Chảy nước mắt, nước mũi, loét miệng?","Đã tiêm vaccine chưa?","Bỏ ăn, mệt?"],
+ [S("Kháng sinh nhỏ mắt, mũi, uống","Doxycycline, amoxicillin, tetracycline nhỏ mắt.","doxycycline|amoxicillin|tetracyclin|gentamicin|oxytetracyclin","Doxycycline, Amoxicillin"),
+  S("Vitamin, lysine, tăng đề kháng","Hỗ trợ phục hồi.","lysine|vitamin c|vitamin|beta.?glucan","Lysine, Vitamin C"),
+  S("Vệ sinh mắt, mũi","Lau bằng nước muối sinh lý.","nacl|nước muối sinh lý","Nước muối sinh lý")],
+ ["Mèo bỏ ăn lâu cần được ép ăn hoặc thú y can thiệp.","Cách ly mèo bệnh, vệ sinh chén nước, khay cát."]);
+A("cho-ve-ky-sinh-mau","Chó sốt, thiếu máu, ve bám nhiều (ký sinh trùng máu)","Chó Mèo",
+ ["Nhiều ve trên chó? Lợi nhợt, vàng?","Sốt, bỏ ăn, nước tiểu sẫm?","Đã xổ giun, diệt ve định kỳ?"],
+ [S("Thuốc trị ký sinh trùng máu","Doxycycline, imidocarb, diminazene theo chỉ định thú y.","doxycycline|imidocarb|diminazene|oxytetracyclin","Doxycycline, Imidocarb"),
+  S("Diệt ve","Phun, nhỏ gáy, uống diệt ve.","fipronil|ivermectin|selamectin|amitraz|permethrin|deltamethrin","Fipronil, Selamectin, Amitraz"),
+  S("Bổ máu","B12, sắt.","b12|sắt|iron|vitamin b12","Vitamin B12, sắt")],
+ ["Diệt ve cả chó và môi trường; lặp lại theo định kỳ.","Thiếu máu nặng cần thú y."]);
+}catch(e){console.warn("bundles-more",e)}
 })();
 
 (function(){
@@ -3854,5 +4156,6 @@ T.add("📋  Toa thuốc (cảnh báo phối hợp, ngưng thuốc, sao chép)",
 
 </script>
 <!--/TOOLS-->
+
 </body>
 </html>
