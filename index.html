@@ -17,7 +17,14 @@
 .overflow-auto.flex-col>*{content-visibility:auto;contain-intrinsic-size:auto 40px}
 .overflow-auto{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 @media (min-width:768px){aside{touch-action:pan-y;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}}
-@media (max-width:767px){aside>div.overflow-x-auto{touch-action:pan-x pan-y;-webkit-overflow-scrolling:touch}}</style>
+@media (max-width:767px){aside>div.overflow-x-auto{touch-action:pan-x pan-y;-webkit-overflow-scrolling:touch}}
+button[data-kh=diet]{box-shadow:inset 6px 0 0 #22c55e!important}
+button[data-kh=kim]{box-shadow:inset 6px 0 0 #f59e0b!important}
+button[data-kh=diet]>div:first-child>span:first-child{color:#22c55e!important}
+button[data-kh=kim]>div:first-child>span:first-child{color:#f59e0b!important}
+button[data-kh]>div:first-child>span:first-child::after{font-size:10px;font-weight:800;margin-left:8px;padding:1px 6px;border-radius:9px;color:#fff;vertical-align:middle}
+button[data-kh=diet]>div:first-child>span:first-child::after{content:"DIỆT KHUẨN";background:#15803d}
+button[data-kh=kim]>div:first-child>span:first-child::after{content:"KÌM KHUẨN";background:#c2410c}</style>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -3512,6 +3519,7 @@ try{
 })();
 </script>
 <script>(function(){try{var f=function(n){if(n.tagName==="IMG"){n.decoding="async";if(!n.loading)n.loading="lazy"}else if(n.querySelectorAll){var a=n.querySelectorAll("img");for(var k=0;k<a.length;k++){a[k].decoding="async";if(!a[k].loading)a[k].loading="lazy"}}};new MutationObserver(function(ms){for(var m=0;m<ms.length;m++)for(var j=0;j<ms[m].addedNodes.length;j++){var n=ms[m].addedNodes[j];if(n.nodeType===1)f(n)}}).observe(document.documentElement,{childList:true,subtree:true})}catch(e){}})();</script>
+<script>(function(){try{var M={"Beta-lactam":"diet","Aminoglycoside (Gentamicin)":"diet","Fluoroquinolone":"diet","Polypeptide":"diet","Khác - Diệt khuẩn kỵ khí":"diet","Tetracycline":"kim","Phenicol":"kim","Macrolide":"kim","Lincosamide":"kim","Sulfonamide":"kim","Khác - Virginiamycin":"kim","Khác - Streptogramin và Pleuromutilin":"kim"};var raf=0;function run(){raf=0;var s=document.querySelectorAll("button.text-left");for(var k=0;k<s.length;k++){var b=s[k],e=b.querySelector("span.font-bold");if(!e)continue;var v=M[e.textContent.trim()];if(v){if(b.dataset.kh!==v)b.dataset.kh=v}else if(b.dataset.kh)delete b.dataset.kh}}new MutationObserver(function(){if(!raf)raf=setTimeout(run,40)}).observe(document.documentElement,{childList:true,subtree:true});}catch(e){}})();</script>
 <!--TOOLS-->
 <script>
 (function(){
