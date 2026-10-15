@@ -4299,8 +4299,11 @@ function secText(r,S){var e=r.e;var t=[];
   return t.join(" \n ").toLowerCase();
 }
 function fieldBlocks(r,S){var e=r.e,out=[];
-  if(primary(e)===S){[["Triệu chứng","trieuChung"],["Chẩn đoán","chanDoan"],["Điều trị","dieuTri"],["Phòng bệnh","cheDoAn"],["Sản phẩm","thongTinChu"]].forEach(function(p){var v=(e[p[1]]||"").trim();if(v&&!/^Nguồn:/.test(v))out.push([p[0],v])});
-    if(e.tongQuan&&out.length<2)out.unshift(["Tổng quan",e.tongQuan])}
+  if(primary(e)===S){
+    if(e.tongQuan)out.push(["Tổng quan",e.tongQuan]);
+    if(e.short&&e.short!==e.tongQuan)out.push(["Mô tả ngắn",e.short]);
+    [["Triệu chứng","trieuChung"],["Chẩn đoán","chanDoan"],["Điều trị","dieuTri"],["Phòng bệnh","cheDoAn"],["Sản phẩm","thongTinChu"],["Lưu ý","canhBao"]].forEach(function(p){var v=(e[p[1]]||"").trim();if(v&&!/^Nguồn:/.test(v))out.push([p[0],v])});
+  }
   (e.customSections||[]).forEach(function(s){var l=srcLabel(s.source);if(l===S&&!/Ghi chú nguồn/.test(s.title||""))out.push([s.title||"",(s.content||"").trim()])});
   return out;
 }
@@ -4325,14 +4328,14 @@ function panelFor(r,title){
     if(k==="__cmp"){body.appendChild(compare(rel,all,have));return}
     var list=have[k];
     if(!list){body.appendChild(el("div",{style:"padding:8px 10px;border-radius:10px;border:1px dashed #ef4444;color:#fca5a5;font-size:13px",text:"Nguồn \""+k+"\" chưa có thông tin về bệnh này trong app. Cần tìm thêm tài liệu của nguồn này để bổ sung."}));return}
-    list.slice(0,6).forEach(function(o){
+    list.slice(0,5).forEach(function(o){
       var blocks=fieldBlocks(o,k);var box=el("div",{style:"padding:8px 10px;margin:6px 0;border-radius:10px;border:1px solid rgba(100,116,139,.5);background:rgba(100,116,139,.1);font-size:13px;line-height:1.5"});
       box.appendChild(el("div",{style:"font-weight:700;margin-bottom:4px",text:(o===r?"▶ ":"")+o.e.name}));
       if(!blocks.length)box.appendChild(el("div",{class:"st-muted",text:"(Nguồn này chỉ nêu tên bệnh, nội dung nằm trong các mục tổng quan của bài.)"}));
-      blocks.forEach(function(b){box.appendChild(el("div",{style:"margin:3px 0;white-space:pre-line"},[el("b",{text:b[0]+": "}),document.createTextNode(clip(b[1],700))]))});
+      blocks.forEach(function(b){box.appendChild(el("div",{style:"margin:3px 0;white-space:pre-line"},[el("b",{text:b[0]+": "}),document.createTextNode(clip(b[1],4000))]))});
       body.appendChild(box);
     });
-    if(list.length>6)body.appendChild(el("div",{class:"st-muted",text:"Còn "+(list.length-6)+" bài khác của nguồn này về cùng bệnh."}));
+    if(list.length>5)body.appendChild(el("div",{class:"st-muted",text:"Còn "+(list.length-5)+" bài khác của nguồn này về cùng bệnh."}));
   }
   var ICON={cty:"🏢 ",cn:"👤 ",tl:"📖 "};
   function mk(k,has){var tp=TYPEOF[k]||guessType(k);var b=el("button",{type:"button",text:ICON[tp]+k+(has?" ("+have[k].length+")":"")});b.__e=!has;setChip(b,false,b.__e);b.addEventListener("click",function(ev){ev.stopPropagation();show(cur===k?null:k)});btns[k]=b;return b}
@@ -4345,6 +4348,7 @@ function panelFor(r,title){
   cb.addEventListener("click",function(ev){ev.stopPropagation();show(cur==="__cmp"?null:"__cmp")});
   r1.appendChild(cb);
   p.appendChild(r1);if(r2)p.appendChild(r2);p.appendChild(body);
+  var pr=primary(r.e);show(have[pr]?pr:(haveL[0]||null));
   return p;
 }
 function compare(rel,all,have){
@@ -4370,6 +4374,14 @@ function compare(rel,all,have){
   wrap.appendChild(el("div",{class:"st-muted",style:"margin-top:4px",text:"X = nguồn đó có nêu nhóm thuốc này khi điều trị bệnh (rê chuột/chạm vào X để xem từ khóa tìm thấy). Ô trống = nguồn đó không nêu hoặc chưa có bài."}));
   return wrap;
 }
+function hideOrig(p){var par=p.parentNode;if(!par)return;var keep=false;var kids=par.children;
+  for(var i=0;i<kids.length;i++){var c=kids[i];if(c===p||c.style.display==="none"&&!c.__origHidden&&c.querySelector&&false)continue;if(c===p)continue;
+    if(c.previousElementSibling===null)continue;
+    var t=(c.innerText||"").trim();
+    if(/^(📦 Sản phẩm cùng|🖼️ Hình ảnh|📷)/.test(t))keep=true;
+    if(c.hasAttribute&&c.hasAttribute("data-ms"))continue;
+    if(!keep&&i>0){var passed=false;for(var q=0;q<i;q++){if(kids[q]===p)passed=true}if(passed)c.style.display="none"}
+  }}
 var tm=null;
 function run(){tm=null;
   var row=null,spans=document.querySelectorAll("main span");
@@ -4384,7 +4396,7 @@ function run(){tm=null;
   var c3=hdr.parentElement&&hdr.parentElement.parentElement;if(!c3||c3.children.length<2)return;
   var body=c3.children[1];var title=((body.innerText||"").split("\n")[0]||"").trim();if(!title)return;
   var old=document.querySelector("main [data-ms]");
-  if(old&&old.getAttribute("data-ms")===title&&old.parentNode===row.parentNode)return;
+  if(old&&old.getAttribute("data-ms")===title&&old.parentNode===row.parentNode){hideOrig(old);return}
   if(old)old.remove();
   var r=findEntry(title);if(!r)return;
   var p=panelFor(r,title);
@@ -4396,6 +4408,7 @@ function run(){tm=null;
     var tx=(cd.innerText||"").split(NL).map(function(x){return x.trim().toLowerCase()}).filter(Boolean);
     if(tx.length>=1&&tx.length<=14&&tg.length&&tx.every(function(x){return tg.indexOf(x)>=0})&&cd.children.length>=1&&cd.querySelectorAll("div").length===0){cd.style.display="none";break}}
   row.parentNode.insertBefore(p,row.nextSibling);
+  hideOrig(p);
 }
 new MutationObserver(function(){if(tm)clearTimeout(tm);tm=setTimeout(run,350)}).observe(document.body,{childList:true,subtree:true});
 }catch(e){console.warn("multisrc",e)}
