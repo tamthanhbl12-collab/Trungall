@@ -4214,18 +4214,23 @@ try{
 var T=window.SOTAY_TOOLS;if(!T)return;
 var el=T.el;
 var TABS={heo5nhom:1,giasuc:1,giacam:1,chomeo:1,thuysan:1,kinhnghiem:1};
-var ORDER=["CP / Sổ tay gốc","Hùng Vịt","3tres3","Anova","Bio-Pharmachemie","Vemedim","Viavet","ICOVET","Á Châu","Navetco","109 bệnh gà","Vinoda","Xuân Trịnh","Giáo trình ĐH Cửu Long"];
-function srcLabel(s){s=String(s||"");
-  if(/Vemedim/i.test(s))return "Vemedim";if(/Anova/i.test(s))return "Anova";if(/Bio-?Pharma/i.test(s))return "Bio-Pharmachemie";
-  if(/Hùng Vịt/i.test(s))return "Hùng Vịt";if(/3tres3/i.test(s))return "3tres3";if(/109 bệnh/i.test(s))return "109 bệnh gà";
-  if(/Viavet|Việt Anh/i.test(s))return "Viavet";if(/ICOVET/i.test(s))return "ICOVET";if(/Achaupharm|Á Châu/i.test(s))return "Á Châu";
-  if(/Navetco/i.test(s))return "Navetco";if(/Vinoda/i.test(s))return "Vinoda";if(/Xuân Trịnh/i.test(s))return "Xuân Trịnh";
-  if(/Giáo trình/i.test(s))return "Giáo trình ĐH Cửu Long";if(/^CP|Sổ tay/i.test(s))return "CP / Sổ tay gốc";return "";}
+var REG=[
+ ["Anova",/Anova/i,"cty"],["Bio-Pharmachemie",/Bio-?Pharma/i,"cty"],["Vemedim",/Vemedim/i,"cty"],["Viavet",/Viavet|Việt Anh/i,"cty"],["ICOVET",/ICOVET/i,"cty"],["Á Châu",/Achaupharm|Á Châu/i,"cty"],["Navetco",/Navetco/i,"cty"],["Hanvet",/Hanvet/i,"cty"],["Marphavet",/Marphavet/i,"cty"],["Vinoda",/Vinoda/i,"cty"],
+ ["Hùng Vịt",/Hùng Vịt/i,"cn"],["Xuân Trịnh (phamxuantrinh)",/Xuân Trịnh/i,"cn"],["DovaHung",/dovahung|dova hung/i,"cn"],
+ ["CP / Sổ tay gốc",/^CP|Sổ tay/i,"tl"],["3tres3 (trang web)",/3tres3/i,"tl"],["109 bệnh gà (sách)",/109 bệnh/i,"tl"],["Giáo trình ĐH Cửu Long",/Giáo trình/i,"tl"],["Đề cương ĐH Nông Lâm",/Đề cương|Giải tham khảo|studocu/i,"tl"]
+];
+var PLANNED=["DovaHung"];
+var TYPES=[["cty","🏢 Công ty"],["cn","👤 Cá nhân, kênh chuyên gia"],["tl","📖 Giáo trình, sách, tài liệu, trang web"]];
+function guessType(s){if(/giáo trình|đề cương|sách|đh |đại học|sổ tay|tài liệu|trang web|\.edu|bệnh viện/i.test(s))return "tl";if(/công ty|co\.|\.vn|\.com|pharma|vet\b|vet |thuốc/i.test(s))return "cty";return "cn"}
+var TYPEOF={};REG.forEach(function(r){TYPEOF[r[0]]=r[2]});
+function srcLabel(s){s=String(s||"").trim();if(!s)return "";
+  for(var i=0;i<REG.length;i++)if(REG[i][1].test(s))return REG[i][0];
+  var l=s.replace(/\s*\(.*?\)\s*/g,"").trim()||s;l=l.slice(0,40);if(!TYPEOF[l])TYPEOF[l]=guessType(s);return l;}
 function primary(e){
   var s=e.src&&(e.src.short||e.src.trieuChung||e.src.dieuTri);
   var l=srcLabel(s);if(l)return l;
-  if(/^kn-/.test(e.id))return "Xuân Trịnh";
-  if(/^g109-/.test(e.id))return "109 bệnh gà";
+  if(/^kn-/.test(e.id))return "Xuân Trịnh (phamxuantrinh)";
+  if(/^g109-/.test(e.id))return "109 bệnh gà (sách)";
   if(/^hv-/.test(e.id))return "Hùng Vịt";
   return "CP / Sổ tay gốc";
 }
@@ -4303,14 +4308,14 @@ function clip(s,n){s=String(s||"");return s.length>n?s.slice(0,n).replace(/\s+\S
 function panelFor(r,title){
   var rel=related(r);
   var have={};rel.forEach(function(o){Object.keys(o.srcs).forEach(function(k){have[k]=(have[k]||[]);have[k].push(o)})});
-  var all=ORDER.slice();var seenAll={};
   var gl={};build().forEach(function(o){Object.keys(o.srcs).forEach(function(k){gl[k]=1})});
+  PLANNED.forEach(function(k){gl[k]=gl[k]||0});
+  var all=[];TYPES.forEach(function(t){REG.forEach(function(r){if(r[2]===t[0]&&gl.hasOwnProperty(r[0])&&all.indexOf(r[0])<0)all.push(r[0])})});
   Object.keys(gl).forEach(function(k){if(all.indexOf(k)<0)all.push(k)});
-  all=all.filter(function(k){return gl[k]});
   var nHave=all.filter(function(k){return have[k]}).length;
   var p=el("div",{"data-ms":title,style:"margin:6px 0 10px;padding:8px 10px;border-radius:12px;border:1px solid rgba(255,193,7,.55);background:rgba(255,193,7,.07)"});
-  var head=el("div",{style:"font-weight:700;margin-bottom:6px;font-size:13px",text:"📚 Nguồn đã gửi cho bệnh này: có "+nHave+"/"+all.length+" nguồn · bấm vào từng nguồn để xem, nguồn gạch đỏ là còn trống"});
-  var chips=el("div",{style:"display:flex;flex-wrap:wrap;gap:6px;align-items:center"});
+  var head=el("div",{style:"font-weight:700;margin-bottom:6px;font-size:13px",text:"📚 Nguồn cho bệnh này: có "+nHave+"/"+all.length+" nguồn (công ty, cá nhân, giáo trình/sách) · bấm vào nguồn để xem, gạch đỏ là còn trống"});
+  var chips=el("div",{style:"display:block"});
   var body=el("div",{style:"margin-top:8px"});
   var cur=null;
   function setChip(b,on,empty){b.style.cssText="padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;border:1px "+(empty?"dashed #ef4444":"solid #16a34a")+";background:"+(on?(empty?"#ef4444":"#16a34a"):"transparent")+";color:"+(on?"#fff":(empty?"#f87171":"#4ade80"))}
@@ -4330,11 +4335,14 @@ function panelFor(r,title){
     });
     if(list.length>6)body.appendChild(el("div",{class:"st-muted",text:"Còn "+(list.length-6)+" bài khác của nguồn này về cùng bệnh."}));
   }
-  all.forEach(function(k){var b=el("button",{type:"button",text:k+(have[k]?" ("+have[k].length+")":" (trống)")});b.__e=!have[k];setChip(b,false,b.__e);b.addEventListener("click",function(ev){ev.stopPropagation();show(cur===k?null:k)});btns[k]=b;chips.appendChild(b)});
+  TYPES.concat([["kh","Khác"]]).forEach(function(t){var ks=all.filter(function(k){return (TYPEOF[k]||guessType(k))===t[0]||(t[0]==="kh"&&!TYPEOF[k])});ks=ks.filter(function(k){return t[0]==="kh"?false:true});if(!ks.length)return;
+  var rowEl=el("div",{style:"display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:3px 0"},[el("span",{class:"st-muted",style:"min-width:150px",text:t[1]})]);
+  ks.forEach(function(k){var b=el("button",{type:"button",text:k+(have[k]?" ("+have[k].length+")":" (trống)")});b.__e=!have[k];setChip(b,false,b.__e);b.addEventListener("click",function(ev){ev.stopPropagation();show(cur===k?null:k)});btns[k]=b;rowEl.appendChild(b)});
+  chips.appendChild(rowEl)});
   var cb=el("button",{type:"button",text:"📊 So sánh phác đồ"});cb.style.cssText="padding:4px 12px;border-radius:999px;font-size:12px;font-weight:800;cursor:pointer;border:1px solid #FFC107;background:transparent;color:#FFC107";btns.__cmp=cb;cb.__e=false;
   cb.addEventListener("click",function(ev){ev.stopPropagation();show(cur==="__cmp"?null:"__cmp")});
   setChip=function(b,on,empty){if(b===cb){b.style.background=on?"#FFC107":"transparent";b.style.color=on?"#0F3D1A":"#FFC107";return}b.style.cssText="padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;border:1px "+(empty?"dashed #ef4444":"solid #16a34a")+";background:"+(on?(empty?"#ef4444":"#16a34a"):"transparent")+";color:"+(on?"#fff":(empty?"#f87171":"#4ade80"))};
-  chips.appendChild(cb);
+  chips.appendChild(el("div",{style:"margin-top:4px"},[cb]));
   p.appendChild(head);p.appendChild(chips);p.appendChild(body);
   return p;
 }
