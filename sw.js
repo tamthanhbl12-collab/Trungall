@@ -16,7 +16,7 @@ self.addEventListener("fetch", (e) => {
     return;
   }
   e.respondWith(
-    fetch(e.request).then(res => {
+    fetch(e.request.url, { cache: "no-cache" }).then(res => {
       const copy = res.clone();
       caches.open(CACHE).then(c => c.put(e.request, copy)).catch(() => {});
       return res;
