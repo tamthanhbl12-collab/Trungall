@@ -4343,10 +4343,13 @@ function panelFor(r,title){
   var r1=el("div",{style:"display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:2px 0"},[el("b",{style:"color:#4ade80;font-size:12.5px",text:"Đã có ("+haveL.length+"/"+all.length+"):"})]);
   haveL.forEach(function(k){r1.appendChild(mk(k,true))});
   var r2=null;
-  if(emptyL.length){r2=el("div",{style:"display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0 2px"},[el("b",{style:"color:#f87171;font-size:12.5px",text:"Trống ("+emptyL.length+"):"})]);emptyL.forEach(function(k){r2.appendChild(mk(k,false))})}
+  if(emptyL.length){r2=el("div",{style:"display:none;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0 2px"},[el("b",{style:"color:#f87171;font-size:12.5px",text:"Chưa có:"})]);emptyL.forEach(function(k){r2.appendChild(mk(k,false))})}
   var cb=el("button",{type:"button",text:"📊 So sánh phác đồ"});cb.__cmp=true;cb.__e=false;cb.style.cssText="padding:3px 11px;border-radius:999px;font-size:12px;font-weight:800;cursor:pointer;border:1px solid #FFC107;background:transparent;color:#FFC107";btns.__cmp=cb;
   cb.addEventListener("click",function(ev){ev.stopPropagation();show(cur==="__cmp"?null:"__cmp")});
   r1.appendChild(cb);
+  if(r2){var tb2=el("button",{type:"button",text:"▸ Trống ("+emptyL.length+")"});tb2.style.cssText="padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;border:1px dashed #ef4444;background:transparent;color:#f87171";
+    tb2.addEventListener("click",function(ev){ev.stopPropagation();var open=r2.style.display==="none";r2.style.display=open?"flex":"none";tb2.textContent=(open?"▾ Trống (":"▸ Trống (")+emptyL.length+")";if(!open&&cur&&!have[cur]&&cur!=="__cmp")show(null)});
+    r1.appendChild(tb2)}
   p.appendChild(r1);if(r2)p.appendChild(r2);p.appendChild(body);
   var pr=primary(r.e);show(have[pr]?pr:(haveL[0]||null));
   return p;
