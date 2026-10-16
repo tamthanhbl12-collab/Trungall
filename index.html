@@ -4356,14 +4356,25 @@ function panelFor(r,title){
     if(k==="__cmp"){body.appendChild(compare(rel,all,have));return}
     var list=have[k];
     if(!list){body.appendChild(el("div",{style:"padding:8px 10px;border-radius:10px;border:1px dashed #ef4444;color:#fca5a5;font-size:13px",text:"Nguồn \""+k+"\" chưa có thông tin về bệnh này trong app. Cần tìm thêm tài liệu của nguồn này để bổ sung."}));return}
-    list.slice(0,5).forEach(function(o){
-      var blocks=fieldBlocks(o,k);var box=el("div",{style:"padding:8px 10px;margin:6px 0;border-radius:10px;border:1px solid rgba(100,116,139,.5);background:rgba(100,116,139,.1);font-size:13px;line-height:1.5"});
-      box.appendChild(el("div",{style:"font-weight:700;margin-bottom:4px",text:(o===r?"▶ ":"")+o.e.name}));
-      if(!blocks.length)box.appendChild(el("div",{class:"st-muted",text:"(Nguồn này chỉ nêu tên bệnh, nội dung nằm trong các mục tổng quan của bài.)"}));
-      renderBlocks(blocks,box);
-      body.appendChild(box);
-    });
-    if(list.length>5)body.appendChild(el("div",{class:"st-muted",text:"Còn "+(list.length-5)+" bài khác của nguồn này về cùng bệnh."}));
+    var words=function(x){return String(x||"").toLowerCase().replace(/^[a-zà-ỹ\-]+:\s*/i,"").split(/[^\p{L}0-9]+/u).filter(function(w){return w.length>2})};
+    var rw=words(r.e.name);
+    var score=function(o){if(o===r)return 1000;var ow=words(o.e.name);return ow.filter(function(w){return rw.indexOf(w)>=0}).length};
+    var sorted=list.slice().sort(function(x,y){return score(y)-score(x)});
+    var main=sorted[0],rest=sorted.slice(1);
+    function entryBox(o,open){
+      var blocks=fieldBlocks(o,k);var box=el("div",{style:"margin:6px 0;border-radius:10px;border:1px solid rgba(100,116,139,.5);background:rgba(100,116,139,.08)"});
+      var hd=el("div",{style:"padding:7px 10px;font-weight:700;font-size:13.5px;cursor:pointer",text:(open?"▾ ":"▸ ")+o.e.name});
+      var inner=el("div",{style:"padding:0 8px 6px;display:"+(open?"block":"none")});
+      if(!blocks.length)inner.appendChild(el("div",{class:"st-muted",text:"(Nguồn này chỉ nêu tên bệnh, nội dung nằm trong các mục tổng quan của bài.)"}));
+      renderBlocks(blocks,inner);
+      hd.addEventListener("click",function(ev){ev.stopPropagation();var o2=inner.style.display==="none";inner.style.display=o2?"block":"none";hd.textContent=(o2?"▾ ":"▸ ")+o.e.name});
+      box.appendChild(hd);box.appendChild(inner);return box;
+    }
+    body.appendChild(entryBox(main,true));
+    if(rest.length){
+      body.appendChild(el("div",{class:"st-muted",style:"margin:8px 2px 2px",text:"Bài khác của nguồn này về bệnh liên quan ("+rest.length+") - bấm tên để mở:"}));
+      rest.forEach(function(o){body.appendChild(entryBox(o,false))});
+    }
   }
   var ICON={cty:"🏢 ",cn:"👤 ",tl:"📖 "};
   function mk(k,has){var tp=TYPEOF[k]||guessType(k);var b=el("button",{type:"button",text:ICON[tp]+k+(has?" ("+have[k].length+")":"")});b.__e=!has;setChip(b,false,b.__e);b.addEventListener("click",function(ev){ev.stopPropagation();show(cur===k?null:k)});btns[k]=b;return b}
