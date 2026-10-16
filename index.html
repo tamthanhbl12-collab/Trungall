@@ -4475,6 +4475,100 @@ new MutationObserver(function(){if(tm)clearTimeout(tm);tm=setTimeout(run,350)}).
 }catch(e){console.warn("multisrc",e)}
 })();
 
+/* Bảng dược lý nhanh: bôi đen tên thuốc / hoạt chất -> hiện thẻ nhỏ */
+(function(){
+try{
+var D=[
+// [aliases(không dấu), tên hiển thị, nhóm, tác dụng, phổ, dùng cho bệnh, lưu ý]
+["penicillin|penicilin|benzylpenicillin|penicillin g|penicillin v","Penicillin","Beta-lactam","Diệt khuẩn (phá vách tế bào)","Gram (+) là chính; vài Gram (-) cầu khuẩn","Liên cầu, tụ cầu, đóng dấu lợn, hoại thư, viêm vú, nhiễm trùng vết thương","Bị beta-lactamase phá hủy. Không phối với kháng sinh kìm khuẩn (tetracyclin, macrolid)."],
+["amoxicillin|amoxycillin|amox","Amoxicillin","Beta-lactam (aminopenicillin)","Diệt khuẩn","Gram (+) và nhiều Gram (-) (E. coli, Salmonella, Pasteurella)","Hô hấp, tiêu hóa, tiết niệu, viêm vú, tụ huyết trùng, liên cầu","Bị beta-lactamase phá; phối clavulanic acid để mở rộng phổ."],
+["ampicillin|ampi","Ampicillin","Beta-lactam (aminopenicillin)","Diệt khuẩn","Gram (+) và Gram (-) (E. coli, Salmonella, Proteus)","Nhiễm trùng hô hấp, tiêu hóa, tiết niệu, viêm rốn, thương hàn","Hấp thu đường uống kém hơn amoxicillin."],
+["clavulanic|clavulanate|clavulanat","Amoxicillin + Clavulanic acid","Beta-lactam + chất ức chế beta-lactamase","Diệt khuẩn","Rộng, gồm cả chủng kháng amoxicillin tiết beta-lactamase","Nhiễm khuẩn kháng amoxicillin thường: hô hấp, tiêu hóa, da, vú, chó mèo","Dùng khi amoxicillin đơn thuần không hiệu quả."],
+["cefquinome|cequin","Cefquinome","Cephalosporin thế hệ 4 (thú y)","Diệt khuẩn","Rộng: Gram (+) và Gram (-)","Viêm phổi, viêm vú-tử cung-mất sữa (MMA), nhiễm trùng huyết, liên cầu heo, Glasser","Dự trữ cho ca nặng, tránh lạm dụng để hạn chế kháng thuốc."],
+["ceftiofur|cefotiofur","Ceftiofur","Cephalosporin thế hệ 3 (thú y)","Diệt khuẩn","Rộng, mạnh với Gram (-)","Hô hấp heo-bò (APP, Pasteurella, Glasser), viêm tử cung, nhiễm trùng huyết","Chú ý thời gian ngưng thuốc."],
+["cefoxim|cefotaxim|cefotaxime|ceftriaxon|ceftriaxone","Cefoxim / Cephalosporin thế hệ 3","Cephalosporin thế hệ 3","Diệt khuẩn","Rộng, mạnh với Gram (-)","Nhiễm khuẩn huyết, màng não, hô hấp, tiêu hóa nặng","Thường dạng tiêm."],
+["cefalexin|cephalexin|cefalexine|cefadroxil|cefazolin|cephalosporin|cefalosporin","Cephalosporin","Beta-lactam","Diệt khuẩn","Gram (+) mạnh ở thế hệ 1; Gram (-) mạnh dần theo thế hệ","Nhiễm trùng da, vú, hô hấp, tiết niệu","Thế hệ càng cao càng rộng phổ."],
+["streptomycin|streptomycine","Streptomycin","Aminoglycoside","Diệt khuẩn (ức chế tổng hợp protein ở ribosom 30S)","Gram (-) hiếu khí, một số Gram (+); lao","Tiêu chảy, thương hàn, Leptospira, nhiễm khuẩn đường tiêu hóa; thường phối penicillin (Pen-Strep)","Độc với tai và thận; dùng đường uống ít hấp thu."],
+["gentamicin|gentamycin|genta","Gentamicin","Aminoglycoside","Diệt khuẩn","Gram (-) hiếu khí (E. coli, Pseudomonas, Salmonella), tụ cầu","Tiêu chảy E. coli, viêm tử cung, nhiễm khuẩn huyết, đường tiết niệu","Độc thận và tai; không dùng cho con vật mất nước, suy thận."],
+["neomycin|neomycine","Neomycin","Aminoglycoside","Diệt khuẩn","Gram (-) đường ruột","Tiêu chảy do E. coli, Salmonella (uống, ít hấp thu)","Uống gần như không hấp thu nên tác dụng tại ruột."],
+["kanamycin|kanamycine","Kanamycin","Aminoglycoside","Diệt khuẩn","Gram (-), tụ cầu","Nhiễm khuẩn hô hấp, tiêu hóa, tiết niệu","Độc tai, thận."],
+["apramycin|apramycine","Apramycin","Aminoglycoside","Diệt khuẩn","Gram (-) (E. coli, Salmonella)","Tiêu chảy E. coli heo con, thương hàn","Hầu như không hấp thu khi uống."],
+["aminoglycosid|aminoglycoside|aminosid","Aminoglycoside","Nhóm kháng sinh","Diệt khuẩn","Gram (-) hiếu khí là chính","Nhiễm khuẩn đường ruột, huyết, tiết niệu","Độc thận, tai; hấp thu uống kém."],
+["colistin|polymyxin|colistine","Colistin","Polymyxin","Diệt khuẩn (phá màng tế bào)","Chỉ Gram (-) (E. coli, Salmonella, Pseudomonas)","Tiêu chảy E. coli heo con, gà con, thương hàn","Uống hầu như không hấp thu nên tác dụng tại ruột. Hạn chế sử dụng theo quy định."],
+["oxytetracyclin|oxytetracycline|oxytetra|oxytet","Oxytetracycline","Tetracycline","Kìm khuẩn (ức chế ribosom 30S)","Rộng: Gram (+), Gram (-), Mycoplasma, Rickettsia, Chlamydia","Hô hấp mạn (CRD, suyễn), tụ huyết trùng, thương hàn, viêm vú, ký sinh trùng máu","Tạo phức với canxi, magie: không trộn khoáng. Có thể hại gan ở liều cao."],
+["doxycyclin|doxycycline|doxy","Doxycycline","Tetracycline (thế hệ 2)","Kìm khuẩn","Rộng: Gram (+), Gram (-), Mycoplasma, Chlamydia","CRD gà, suyễn heo, viêm phổi, tụ huyết trùng, E. coli, thương hàn","Hấp thu tốt, thải chậm; ít bị ảnh hưởng bởi canxi hơn oxytetracyclin."],
+["chlortetracyclin|chlortetracycline|clotetracyclin|ctc","Chlortetracycline","Tetracycline","Kìm khuẩn","Rộng","Hô hấp, tiêu hóa, thường trộn thức ăn","Cùng lưu ý với nhóm tetracyclin."],
+["tetracyclin|tetracycline","Tetracycline","Tetracycline","Kìm khuẩn","Rộng: Gram (+), Gram (-), Mycoplasma","Hô hấp, tiêu hóa, viêm vú","Tạo phức với Ca, Mg, Fe."],
+["tylosin|tylosine","Tylosin","Macrolide","Kìm khuẩn (có thể diệt khuẩn ở nồng độ cao)","Gram (+), Mycoplasma, Treponema, Lawsonia","Viêm hồi tràng (PPE/Lawsonia), hồng lỵ, suyễn Mycoplasma, CRD gà","Phổ hẹp hơn tetracyclin; ít tác dụng với Gram (-)."],
+["tilmicosin|tilmicosine","Tilmicosin","Macrolide","Kìm khuẩn","Gram (+), Pasteurella, Actinobacillus, Mycoplasma","Viêm phổi, APP, tụ huyết trùng heo-bò, CRD","Tiêm có thể độc với tim; thận trọng khi tiêm."],
+["tiamulin|tiamulline|valnemulin|pleuromutilin","Tiamulin / Valnemulin","Pleuromutilin","Kìm khuẩn","Mycoplasma, Brachyspira, Treponema, Gram (+)","Hồng lỵ heo, viêm hồi tràng, suyễn, viêm khớp Mycoplasma, CRD gà","Không dùng cùng ionophore (monensin, salinomycin): gây ngộ độc."],
+["tulathromycin|tulathromycine","Tulathromycin","Macrolide (triamilide)","Kìm khuẩn (diệt khuẩn một số chủng)","Pasteurella, Actinobacillus, Mycoplasma, Haemophilus","Hô hấp heo-bò (APP, tụ huyết trùng, Glasser), tác dụng kéo dài","Một mũi tiêm; chú ý thời gian ngưng thuốc."],
+["spiramycin|spiramycine","Spiramycin","Macrolide","Kìm khuẩn","Gram (+), Mycoplasma","Hô hấp, viêm vú, CRD","Tập trung nhiều ở mô phổi và sữa."],
+["erythromycin|erythromycine|azithromycin|clarithromycin|macrolid|macrolide","Macrolide","Macrolide","Kìm khuẩn (ức chế ribosom 50S)","Gram (+), Mycoplasma, Chlamydia, Campylobacter","Hô hấp mạn, viêm vú, viêm ruột, Campylobacter","Kháng chéo giữa các macrolide."],
+["lincomycin|lincomycine|clindamycin","Lincomycin","Lincosamide","Kìm khuẩn","Gram (+), Mycoplasma, Treponema, kỵ khí","Hồng lỵ, viêm hồi tràng, viêm khớp, viêm xương, nhiễm trùng da","Thường phối spectinomycin (LS) để thêm phổ Gram (-)."],
+["spectinomycin|spectinomycine","Spectinomycin","Aminocyclitol","Kìm khuẩn","Gram (-), Mycoplasma","Tiêu chảy E. coli, CRD (thường phối lincomycin)","Hấp thu uống kém."],
+["florfenicol|flo|thiamphenicol|chloramphenicol|phenicol","Florfenicol / Phenicol","Phenicol","Kìm khuẩn (ức chế ribosom 50S)","Rộng: Gram (+), Gram (-), Mycoplasma, Haemophilus","Hô hấp heo-bò-gà-cá (APP, Glasser, tụ huyết trùng), thương hàn, bệnh thủy sản (đốm đỏ, gan thận mủ)","Chloramphenicol cấm dùng cho vật nuôi lấy thực phẩm. Florfenicol dùng thận trọng với heo nái, ức chế miễn dịch."],
+["enrofloxacin|enro|baytril","Enrofloxacin","Fluoroquinolone","Diệt khuẩn (ức chế DNA gyrase)","Rộng: Gram (-) mạnh, Gram (+), Mycoplasma","Tiêu chảy E. coli, thương hàn, tụ huyết trùng, CRD, hô hấp, tiết niệu","Không dùng cho con non đang phát triển xương, gà đẻ trứng ăn; hạn chế sử dụng."],
+["ciprofloxacin|cipro|norfloxacin|marbofloxacin|danofloxacin|difloxacin|ofloxacin|flumequin|flumequine|quinolon|quinolone|fluoroquinolon|fluoroquinolone","Quinolone / Fluoroquinolone","Quinolone","Diệt khuẩn (ức chế DNA gyrase)","Gram (-) mạnh; rộng ở thế hệ mới","Tiêu chảy, thương hàn, hô hấp, tiết niệu, nhiễm khuẩn huyết","Kháng thuốc tăng nhanh; không dùng cho con non, gia cầm đẻ."],
+["sulfamethoxazole|sulfadiazin|sulfadiazine|sulfaquinoxalin|sulfadimidin|sulfamid|sulfonamid|sulfonamide|sulfa|trimethoprim|tmp|bactrim|co-trimoxazol","Sulfonamide / Trimethoprim","Sulfamid","Kìm khuẩn (phối TMP thành diệt khuẩn)","Rộng: Gram (+), Gram (-), cầu trùng, đơn bào","Tiêu chảy, cầu trùng, thương hàn, tụ huyết trùng, viêm hô hấp, nhiễm khuẩn tiết niệu","Cần uống đủ nước (nguy cơ kết tinh thận); hại gan ở liều cao."],
+["amprolium|toltrazuril|diclazuril|robenidin|robenidine|coccidiostat","Thuốc cầu trùng","Chống cầu trùng","Kìm hoặc diệt cầu trùng (tùy hoạt chất)","Eimeria, Isospora","Cầu trùng gà, heo con, thỏ, bê","Luân phiên thuốc để hạn chế kháng."],
+["salinomycin|monensin|narasin|lasalocid|ionophore","Ionophore (cầu trùng)","Phòng cầu trùng","Diệt cầu trùng","Eimeria; Gram (+)","Phòng cầu trùng gà, kích thích tăng trọng","Cực độc với ngựa, gây ngộ độc khi dùng chung tiamulin/valnemulin."],
+["ivermectin|abamectin|doramectin|moxidectin|eprinomectin","Ivermectin / Avermectin","Avermectin","Diệt ký sinh trùng","Giun tròn, ghẻ, rận, ve","Giun, ghẻ lợn, rận, ve, bọ chét","Độc với chó Collie (đột biến MDR1); không dùng cho cá, tôm."],
+["levamisol|levamisole|albendazol|albendazole|fenbendazol|fenbendazole|mebendazol|mebendazole|praziquantel|niclosamid|closantel|oxyclozanid|benzimidazole","Thuốc tẩy giun sán","Chống ký sinh trùng nội","Diệt giun sán","Giun tròn, sán dây, sán lá","Giun đũa, giun tóc, sán dây, sán lá gan","Một số thuốc độc phôi, cẩn thận với thú mang thai."],
+["bromhexin|bromhexine|ambroxol|acetylcystein","Bromhexin / long đờm","Long đờm","Hỗ trợ","—","Ho, viêm phổi, đờm đặc","Dùng kèm kháng sinh."],
+["paracetamol|analgin|metamizol|dipyron|aspirin|ketoprofen|meloxicam|flunixin|nsaid","Hạ sốt, giảm đau, kháng viêm","NSAID / giảm đau","Hạ sốt, giảm viêm","—","Sốt cao, viêm khớp, viêm vú, đau","Thận trọng với thú mất nước, loét dạ dày."],
+["dexamethason|dexamethasone|prednisolon|prednisolone|corticoid|glucocorticoid|betamethason","Corticoid","Kháng viêm steroid","Kháng viêm, ức chế miễn dịch","—","Sốc, viêm nặng, dị ứng, gây sinh","Có thể gây sảy thai ở nái mang thai; ức chế miễn dịch, dùng ngắn ngày."],
+["oxytocin|prostaglandin|cloprostenol|carbetocin","Oxytocin / PGF2α","Hormone sinh sản","Co tử cung / gây sinh","—","Đẻ khó, sót nhau, kích sữa, gây sinh","Không dùng khi ngôi thai bất thường, cổ tử cung chưa mở."],
+["lactobacillus|bacillus subtilis|probiotic|men vi sinh|enzyme","Men vi sinh / enzyme","Hỗ trợ tiêu hóa","Cân bằng hệ vi sinh","—","Tiêu chảy, rối loạn tiêu hóa, sau dùng kháng sinh","Không dùng cùng lúc với kháng sinh diệt khuẩn đường ruột."],
+["nystatin|griseofulvin|clotrimazol|clotrimazole|ketoconazol|ketoconazole|itraconazol|itraconazole|fluconazol|fluconazole","Thuốc kháng nấm","Antifungal","Diệt hoặc kìm nấm","Nấm men, nấm sợi","Nấm da, nấm phổi, tưa miệng","Điều trị kéo dài; có thể hại gan."],
+["formalin|povidone|povidon|benzalkonium|bkc|glutaraldehyd|glutaraldehyde|virkon","Sát trùng, khử trùng","Chất sát khuẩn","Diệt vi sinh vật","Rộng: vi khuẩn, virus, nấm (tùy hoạt chất)","Khử trùng chuồng, dụng cụ, ao nuôi, sát trùng vết thương","Không dùng trực tiếp trên vật nuôi nếu không có chỉ dẫn; chú ý nồng độ."]
+];
+var norm=function(s){return String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/đ/g,"d").replace(/[^a-z0-9+\s\-]/g," ").replace(/\s+/g," ").trim()};
+var IDX=D.map(function(r){return{al:r[0].split("|").map(norm).filter(Boolean),r:r}});
+var findAll=function(sel){
+ var q=" "+norm(sel)+" ",out=[],seen={};
+ IDX.forEach(function(x){for(var i=0;i<x.al.length;i++){var a=x.al[i];if(a.length<3)continue;if(q.indexOf(" "+a+" ")>=0||(a.length>=6&&q.indexOf(a)>=0)){if(!seen[x.r[1]]){seen[x.r[1]]=1;out.push(x.r)}break}}});
+ return out};
+var st=document.createElement("style");
+st.textContent="#dt-pop{position:fixed;z-index:200;width:min(340px,calc(100vw - 20px));max-height:60vh;overflow:auto;background:#0f172a;color:#e2e8f0;border:1px solid #16a34a;border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.55);font-size:13px;line-height:1.45;padding:10px 12px;display:none}"+
+"#dt-pop.on{display:block}#dt-pop h4{margin:0 0 4px;font-size:15px;color:#86efac;padding-right:22px}#dt-pop .dt-c{border-top:1px solid #334155;padding-top:8px;margin-top:8px}#dt-pop .dt-c.f{border:0;padding:0;margin:0}"+
+"#dt-pop .dt-b{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:700;margin:0 4px 4px 0}"+
+"#dt-pop .dk{background:#7f1d1d;color:#fecaca}#dt-pop .dd{background:#78350f;color:#fde68a}#dt-pop .dn{background:#334155;color:#e2e8f0}"+
+"#dt-pop .dt-l{color:#94a3b8;font-weight:700}#dt-x{position:absolute;right:8px;top:6px;background:none;border:0;color:#94a3b8;font-size:16px;cursor:pointer}";
+document.head.appendChild(st);
+var pop=document.createElement("div");pop.id="dt-pop";
+pop.addEventListener("mousedown",function(e){e.preventDefault()});
+document.body.appendChild(pop);
+var esc=function(s){return String(s).replace(/[&<>]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;"}[c]})};
+var hide=function(){pop.classList.remove("on")};
+var card=function(r,i){
+ var kill=/^Diệt/.test(r[3])?"dk":/^Kìm/.test(r[3])?"dd":"dn";
+ return '<div class="dt-c'+(i?'':' f')+'"><h4>💊 '+esc(r[1])+'</h4><span class="dt-b dn">'+esc(r[2])+'</span><span class="dt-b '+kill+'">'+esc(r[3])+'</span>'+
+ '<div><span class="dt-l">Phổ: </span>'+esc(r[4])+'</div><div><span class="dt-l">Dùng cho: </span>'+esc(r[5])+'</div><div><span class="dt-l">Lưu ý: </span>'+esc(r[6])+'</div></div>'};
+var show=function(list,rect){
+ pop.innerHTML='<button id="dt-x" aria-label="Đóng">✕</button>'+list.slice(0,4).map(card).join("")+(list.length>4?'<div class="dt-c dt-l">… và '+(list.length-4)+' mục khác, hãy bôi đen ngắn hơn.</div>':"")+'<div class="dt-c dt-l" style="font-size:11px;font-weight:400">Thông tin tóm tắt để tham khảo; liều và chỉ định theo nhãn thuốc và thú y.</div>';
+ pop.classList.add("on");
+ var W=pop.offsetWidth,H=pop.offsetHeight,vw=window.innerWidth,vh=window.innerHeight;
+ var x=Math.min(Math.max(10,rect.left),vw-W-10);
+ var y=rect.bottom+8;if(y+H>vh-10)y=Math.max(10,rect.top-H-8);
+ pop.style.left=x+"px";pop.style.top=y+"px";
+ var b=document.getElementById("dt-x");if(b)b.onclick=hide};
+var timer=null,last="";
+var check=function(){
+ var s=window.getSelection();if(!s||s.isCollapsed||s.rangeCount===0){hide();last="";return}
+ var txt=s.toString().trim();if(txt.length<3||txt.length>300){hide();return}
+ var n=s.anchorNode&&(s.anchorNode.nodeType===1?s.anchorNode:s.anchorNode.parentElement);
+ if(n&&n.closest&&n.closest("input,textarea,#dt-pop,[contenteditable=true]"))return;
+ if(txt===last&&pop.classList.contains("on"))return;
+ var list=findAll(txt);if(!list.length){hide();return}
+ last=txt;
+ show(list,s.getRangeAt(0).getBoundingClientRect())};
+document.addEventListener("selectionchange",function(){clearTimeout(timer);timer=setTimeout(check,450)});
+document.addEventListener("keydown",function(e){if(e.key==="Escape")hide()});
+window.SOTAY_DRUGTIP={find:findAll,count:D.length};
+}catch(e){console.warn("drugtip",e)}
+})();
+
 </script>
 <!--/TOOLS-->
 
