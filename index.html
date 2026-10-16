@@ -4245,7 +4245,7 @@ function species(e){
   return o;
 }
 // nhóm bệnh (đồng nghĩa) dùng để nối các bài cùng bệnh giữa các nguồn
-var G=[["liên cầu","streptococc"],["tụ cầu","staphylococc"],["phó thương hàn","salmonella choleraesuis","salmonella typhimurium"],["thương hàn","salmonella","bạch lỵ","pullorum"],["tụ huyết trùng","pasteurella"],["e.coli","e. coli","coli","phù đầu","colibacill"],["cầu trùng","coccidio","eimeria","isospora"],["dịch tả heo","csfv","hog cholera"],["tai xanh","prrs"],["châu phi","asf"],["lở mồm","long móng","lmlm","fmd"],["suyễn","mycoplasma hyopneumoniae"],["dính sườn","actinobacillus","app"],["nấm phổi","aspergill"],["đầu đen","histomon"],["gumboro","ibd","fabricius"],["newcastle","dịch tả gà"],["cúm","h5n1","influenza"],["carré","distemper"],["parvo","cpv"],["giảm bạch cầu","fpv","panleukopenia"],["ghẻ","scabies","sarcopt"],["xoắn khuẩn","leptospir"],["đóng dấu son","erysipel"],["sảy thai","brucella","abortion"],["viêm vú","mma","mastitis","mất sữa"],["teo mũi","atrophic","viêm mũi"],["lê dạng","babesia"],["tiên mao","trypanosoma"],["biên trùng","anaplasma"],["đốm trắng","wssv"],["đầu vàng","yhv"],["hoại tử gan tụy","ahpnd","ems"],["vi bào tử","ehp"],["đứt khúc","phân trắng","gregarine"],["marek"],["viêm khớp","reovirus","tenosynov"],["mycoplasma suis","eperythro","thiếu máu"],["glasser","haemophilus","đa xoang"],["ped","tge","tiêu chảy cấp"],["pcv2","circo"],["crd","hô hấp mãn tính","mycoplasma gallisepticum","khò khè","ort","coryza"],["adeno"],["flavivirus","tembusu"],["viêm gan vịt","dhv"],["dịch tả vịt","duck virus enteritis"],["viêm phổi"],["đậu gà","đậu cút","avipox"],["thối mang","myxococc","flavobact"],["lở loét","aeromonas","eus"],["nấm thủy mi","saprolegn"],["gù lưng"],["mù mắt","quẹo cổ","vẹo cổ"],["sình bụng","đường ruột"],["trùng bánh xe","trichodina"],["sán lá gan","fasciol"],["chướng hơi","bloat"],["viêm da nổi cục","lumpy"],["nấm da","ringworm","dermatophyt"],["dại","rabies"],["viêm ruột hoại tử","clostridium"],["ecoli gà","viêm rốn","omphalitis"]];
+var G=[["liên cầu","streptococc"],["tụ cầu","staphylococc"],["phó thương hàn","salmonella choleraesuis","salmonella typhimurium"],["thương hàn","salmonella","bạch lỵ","pullorum"],["tụ huyết trùng","pasteurella"],["e.coli","e. coli","ecoli","phù đầu","colibacill"],["cầu trùng","coccidio","eimeria","isospora"],["dịch tả heo","csfv","hog cholera"],["tai xanh","prrs"],["châu phi","asf"],["lở mồm","long móng","lmlm","fmd"],["suyễn","mycoplasma hyopneumoniae"],["dính sườn","actinobacillus","app"],["nấm phổi","aspergill"],["đầu đen","histomon"],["gumboro","ibd","fabricius"],["newcastle","dịch tả gà"],["cúm","h5n1","influenza"],["carré","distemper"],["parvo","cpv"],["giảm bạch cầu","fpv","panleukopenia"],["ghẻ","scabies","sarcopt"],["xoắn khuẩn","leptospir"],["đóng dấu son","erysipel"],["sảy thai","brucella","abortion"],["viêm vú","mma","mastitis","mất sữa"],["teo mũi","atrophic","viêm mũi"],["lê dạng","babesia"],["tiên mao","trypanosoma"],["biên trùng","anaplasma"],["đốm trắng","wssv"],["đầu vàng","yhv"],["hoại tử gan tụy","ahpnd","ems"],["vi bào tử","ehp"],["đứt khúc","phân trắng","gregarine"],["marek"],["viêm khớp","reovirus","tenosynov"],["mycoplasma suis","eperythro","thiếu máu"],["glasser","haemophilus","đa xoang"],["ped","tge","tiêu chảy cấp"],["pcv2","circo"],["crd","hô hấp mãn tính","mycoplasma gallisepticum","khò khè","ort","coryza"],["adeno"],["flavivirus","tembusu"],["viêm gan vịt","dhv"],["dịch tả vịt","duck virus enteritis"],["viêm phổi"],["đậu gà","đậu cút","avipox"],["thối mang","myxococc","flavobact"],["lở loét","aeromonas","eus"],["nấm thủy mi","saprolegn"],["gù lưng"],["mù mắt","quẹo cổ","vẹo cổ"],["sình bụng","đường ruột"],["trùng bánh xe","trichodina"],["sán lá gan","fasciol"],["chướng hơi","bloat"],["viêm da nổi cục","lumpy"],["nấm da","ringworm","dermatophyt"],["dại","rabies"],["viêm ruột hoại tử","clostridium"],["ecoli gà","viêm rốn","omphalitis"]];
 G.forEach(function(g,i){g.re=new RegExp("(^|[^\\p{L}0-9])(?:"+g.map(function(x){return x.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")}).join("|")+")","iu")});
 var IDX=null;
 function build(){
@@ -4261,11 +4261,15 @@ function build(){
 }
 var byName=null;
 function findEntry(name){var ix=build();if(!ix)return null;if(!byName){byName={};ix.forEach(function(r){byName[(r.e.name||"").trim()]=r})}return byName[name.trim()]||null}
+var STOP={"bệnh":1,"trên":1,"của":1,"các":1,"và":1,"cho":1,"với":1,"phòng":1,"trị":1,"điều":1,"nguyên":1,"nhân":1,"triệu":1,"chứng":1,"phác":1,"đồ":1,"anova":1,"bio":1,"video":1,"hội":1};
+function nameWords(n){var o={};String(n||"").toLowerCase().replace(/\([^)]*\)/g," ").replace(/^[a-zà-ỹ\-]+:\s*/i,"").split(/[^\p{L}0-9]+/u).forEach(function(w){if(w.length>2&&!STOP[w])o[w]=1});return o}
+function jac(a,b){var i=0,u=0,k;for(k in a){u++;if(b[k])i++}for(k in b){if(!a[k])u++}return u?i/u:0}
 function related(r){
-  var ix=build();var list=[r];
+  var ix=build();var list=[r];var rw=nameWords(r.e.name);
   ix.forEach(function(o){if(o===r)return;
     var okS=Object.keys(r.sp).some(function(k){return o.sp[k]});if(!okS)return;
-    var okC=r.cs.some(function(c){return o.cs.indexOf(c)>=0});if(okC)list.push(o)});
+    var okC=r.cs.some(function(c){return o.cs.indexOf(c)>=0});if(!okC)return;
+    if(jac(rw,nameWords(o.e.name))>=0.25)list.push(o)});
   return list;
 }
 var FN=[
